@@ -1,0 +1,45 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+
+  "plugins": [
+    "react",
+    "react-hooks"
+  ],
+
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "rules": {
+    "indent": [
+      "error",
+      4
+    ],
+//    "linebreak-style": [
+//      "error",
+//      "unix"
+//    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "never"
+    ],
+    "no-console": 0,
+    "strict": 0,
+    "react/prop-types": 0,
+    // should add prop-types in future
+    "react/no-find-dom-node": 0,
+    // should remove findDomNode in future
+    "max-len": ["warn", { "code": 140 }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  }
+}
