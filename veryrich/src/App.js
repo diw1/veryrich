@@ -36,10 +36,18 @@ class DashboardPage extends Component{
         return enemies.map(enemy=>trashIds.includes(enemy.guid)&&enemy.id).filter(id=>!!id)
     }
 
+    calculateBossTime = (fight) => {
+        let sum = 0
+        fight&&fight.fights.filter(record=>record.boss!==0).map(record=>{
+            sum+=record.end_time-record.start_time
+        })
+        return sum/1000
+    }
+
     generateSource = (bossDmg, bossTrashDmg) => {
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
-
+        const bossTime = this.calculateBossTime(this.props.fight)
         let source = bossDmg.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
@@ -49,6 +57,7 @@ class DashboardPage extends Component{
                 name: entry.name,
                 type: entry.type,
                 bossDmg: entry.total,
+                bossDps: (entry.total/bossTime).toFixed(2),
                 bossTrashDmg: trashDmg
             }
         })
@@ -120,6 +129,10 @@ class DashboardPage extends Component{
                 title: 'Boss伤害',
                 dataIndex: 'bossDmg',
                 sorter: (a, b) => a.bossDmg-b.bossDmg,
+            },
+            {
+                title: 'Boss DPS',
+                dataIndex: 'bossDps',
             },
             {
                 title: '全程有效伤害',
