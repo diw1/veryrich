@@ -72,6 +72,30 @@ export default {
             })
         },
 
+        async getBossTrashSunderCasts({reportId, trashIds}){
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            trashIds.map(trashId=> {
+                promises.push(service.getBOSSTrashCast(reportId, trashId))
+            })
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.sunder = res.sunder || 0
+                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.abilities.find(ability=>ability.name===
+                            '破甲攻击')?.total
+                        res.sunder =  Number.isInteger(newCast) ? res.sunder + newCast : res.sunder
+                        return res
+                    })
+                    actions.report.save({
+                        bossTrashSunderCasts: result
+                    })
+                })
+            })
+        },
+
+
         async getBOSSDmg(reportId){
             const result = await service.getBOSSDMG(reportId)
             actions.report.save({

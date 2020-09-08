@@ -7,6 +7,7 @@ const mapStateToProps = state => ({
     bossDmg: state.report.bossDmg,
     fight: state.report.fight,
     bossTrashDmg: state.report.bossTrashDmg,
+    bossTrashSunderCasts: state.report.bossTrashSunderCasts
 })
 
 class DashboardPage extends Component{
@@ -27,9 +28,11 @@ class DashboardPage extends Component{
         promises.push(actions.report.getFight(this.state.report))
         Promise.all(promises).then(()=>{
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
+            const bossIds = this.findTargetIds(globalConstants.BOSSIDS, this.props.fight)
             const bossTrashIds = this.findTargetIds(globalConstants.EXTRABOSSIDS, this.props.fight)
             actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}).then(()=> this.setState({loading: false}))
             actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report}).then(()=> this.setState({loading: false}))
+            actions.report.getBossTrashSunderCasts({trashIds: trashIds.concat(bossIds), reportId: this.state.report})
         })
     }
 
@@ -46,12 +49,13 @@ class DashboardPage extends Component{
         return sum/1000
     }
 
-    generateSource = (bossDmg, bossTrashDmg) => {
+    generateSource = (bossDmg, bossTrashDmg, bossTrashSunderCasts) => {
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
         let source = bossDmg.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
+            const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
             return {
@@ -60,7 +64,8 @@ class DashboardPage extends Component{
                 type: entry.type,
                 bossDmg: entry.total,
                 bossDps: (entry.total/bossTime).toFixed(2),
-                bossTrashDmg: trashDmg
+                bossTrashDmg: trashDmg,
+                sunderCasts: sunderCasts,
             }
         })
 
@@ -76,8 +81,8 @@ class DashboardPage extends Component{
     }
 
     render() {
-        const {bossDmg, bossTrashDmg} = this.props
-        const dataSource = bossDmg && bossTrashDmg && this.generateSource(bossDmg, bossTrashDmg)
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts} = this.props
+        const dataSource = bossDmg && bossTrashDmg && bossTrashSunderCasts && this.generateSource(bossDmg, bossTrashDmg, bossTrashSunderCasts)
         const columns = [
             {
                 title: 'ID',
@@ -141,6 +146,11 @@ class DashboardPage extends Component{
                 dataIndex: 'bossTrashDmg',
                 sorter: (a, b) => a.bossTrashDmg-b.bossTrashDmg,
                 defaultSortOrder: 'descend',
+            },
+            {
+                title: '战士有效破甲数量',
+                dataIndex: 'sunderCasts',
+                render: (text,record)=> record.type ==='Warrior' ? text : ''
             },
             {
                 title: 'BOSS分',

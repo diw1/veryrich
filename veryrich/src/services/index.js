@@ -20,6 +20,11 @@ function getBOSSTrashDmg (reportID, trashIDs) {
     return getData(url)
 }
 
+function getBOSSTrashCast (reportID, trashIDs) {
+    const url = `${globalConstants.BASE_URL}report/tables/casts/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&targetid=${trashIDs}`
+    return getData(url)
+}
+
 function getFight (reportID) {
     const url = `${globalConstants.BASE_URL}report/fights/${reportID}?api_key=${globalConstants.API_KEY}`
     return getData(url)
@@ -30,5 +35,6 @@ export default {
     getDMGdone,
     getBOSSDMG,
     getBOSSTrashDmg,
+    getBOSSTrashCast,
     getFight
 }
