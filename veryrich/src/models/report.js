@@ -51,6 +51,27 @@ export default {
             })
         },
 
+        async getExtraBossDmg({reportId, bossTrashIds}){
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            bossTrashIds.map(trashId=> {
+                promises.push(service.getBOSSTrashDmg(reportId, trashId))
+            })
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        const newDmg = trashRecord.data.entries.find(i=>i.id===entry.id)?.total
+                        res.total = Number.isInteger(newDmg) ? res.total + newDmg : res.total
+                        return res
+                    })
+                    actions.report.save({
+                        bossDmg: result
+                    })
+                })
+            })
+        },
+
         async getBOSSDmg(reportId){
             const result = await service.getBOSSDMG(reportId)
             actions.report.save({

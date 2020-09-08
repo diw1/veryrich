@@ -27,7 +27,9 @@ class DashboardPage extends Component{
         promises.push(actions.report.getFight(this.state.report))
         Promise.all(promises).then(()=>{
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
+            const bossTrashIds = this.findTargetIds(globalConstants.EXTRABOSSIDS, this.props.fight)
             actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}).then(()=> this.setState({loading: false}))
+            actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report}).then(()=> this.setState({loading: false}))
         })
     }
 
