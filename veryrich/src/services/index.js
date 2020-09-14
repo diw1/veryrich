@@ -34,11 +34,17 @@ function getDamageTakenByAbility (reportID, abilityId) {
     return getData(url)
 }
 
+function getDebuffsByAbility (reportID, abilityId) {
+    const url = `${globalConstants.BASE_URL}report/tables/debuffs/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}`
+    return getData(url)
+}
+
 export default {
     getDMGdone,
     getBOSSDMG,
     getBOSSTrashDmg,
     getBOSSTrashCast,
     getFight,
-    getDamageTakenByAbility
+    getDamageTakenByAbility,
+    getDebuffsByAbility
 }

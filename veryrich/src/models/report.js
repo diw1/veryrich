@@ -11,6 +11,7 @@ export default {
         fight:null,
         bossTrashDmg:null,
         poisonDmgTaken: null,
+        fearDebuff: null,
     },
     reducers: {
         save(state, data) {
@@ -36,6 +37,13 @@ export default {
             const result = await service.getDamageTakenByAbility(reportId, globalConstants.POISONID)
             actions.report.save({
                 poisonDmgTaken: result.data.entries
+            })
+        },
+
+        async getFearDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.FEARID)
+            actions.report.save({
+                fearDebuff: result.data.auras
             })
         },
 

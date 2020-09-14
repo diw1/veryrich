@@ -9,6 +9,7 @@ const mapStateToProps = state => ({
     bossTrashDmg: state.report.bossTrashDmg,
     bossTrashSunderCasts: state.report.bossTrashSunderCasts,
     poisonDmgTaken: state.report.poisonDmgTaken,
+    fearDebuff: state.report.fearDebuff,
 })
 
 class DashboardPage extends Component{
@@ -28,6 +29,7 @@ class DashboardPage extends Component{
         promises.push(actions.report.getBOSSDmg(this.state.report))
         promises.push(actions.report.getFight(this.state.report))
         promises.push(actions.report.getPoisonDmgTaken(this.state.report))
+        promises.push(actions.report.getFearDebuff(this.state.report))
         Promise.all(promises).then(()=>{
             promises = []
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
@@ -56,7 +58,7 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
@@ -64,6 +66,7 @@ class DashboardPage extends Component{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
             const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
+            const fearTime = fearDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 || ''
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
             return {
@@ -74,6 +77,7 @@ class DashboardPage extends Component{
                 bossDps: (entry.total/bossTime).toFixed(2),
                 bossTrashDmg: trashDmg,
                 poisonTicks: poisonTicks,
+                fearTime: fearTime,
                 sunderCasts: sunderCasts,
             }
         })
@@ -164,6 +168,11 @@ class DashboardPage extends Component{
                 title: '软泥毒箭DOT伤害次数',
                 dataIndex: 'poisonTicks',
                 sorter: (a, b) => a.poisonTicks-b.poisonTicks,
+            },
+            {
+                title: '三宝恐惧持续时间',
+                dataIndex: 'fearTime',
+                sorter: (a, b) => a.fearTime-b.fearTime,
             },
             {
                 title: 'BOSS分',
