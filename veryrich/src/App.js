@@ -7,7 +7,8 @@ const mapStateToProps = state => ({
     bossDmg: state.report.bossDmg,
     fight: state.report.fight,
     bossTrashDmg: state.report.bossTrashDmg,
-    bossTrashSunderCasts: state.report.bossTrashSunderCasts
+    bossTrashSunderCasts: state.report.bossTrashSunderCasts,
+    poisonDmgTaken: state.report.poisonDmgTaken,
 })
 
 class DashboardPage extends Component{
@@ -26,13 +27,18 @@ class DashboardPage extends Component{
 
         promises.push(actions.report.getBOSSDmg(this.state.report))
         promises.push(actions.report.getFight(this.state.report))
+        promises.push(actions.report.getPoisonDmgTaken(this.state.report))
         Promise.all(promises).then(()=>{
+            promises = []
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
             const bossIds = this.findTargetIds(globalConstants.BOSSIDS, this.props.fight)
             const bossTrashIds = this.findTargetIds(globalConstants.EXTRABOSSIDS, this.props.fight)
-            actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}).then(()=> this.setState({loading: false}))
-            actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report}).then(()=> this.setState({loading: false}))
-            actions.report.getBossTrashSunderCasts({trashIds: trashIds.concat(bossIds), reportId: this.state.report})
+            promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}))
+            promises.push(actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report}))
+            promises.push(actions.report.getBossTrashSunderCasts({trashIds: trashIds.concat(bossIds), reportId: this.state.report}))
+            Promise.all(promises).then(()=>{
+                this.setState({loading: false})
+            })
         })
     }
 
@@ -49,13 +55,15 @@ class DashboardPage extends Component{
         return sum/1000
     }
 
-    generateSource = (bossDmg, bossTrashDmg, bossTrashSunderCasts) => {
+    generateSource = () => {
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
-        let source = bossDmg.map(entry=>{
+        let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
+            const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
             return {
@@ -65,11 +73,12 @@ class DashboardPage extends Component{
                 bossDmg: entry.total,
                 bossDps: (entry.total/bossTime).toFixed(2),
                 bossTrashDmg: trashDmg,
+                poisonTicks: poisonTicks,
                 sunderCasts: sunderCasts,
             }
         })
 
-        source = source.map(entry=>{
+        source = source?.map(entry=>{
             const bossScore =  (entry.bossDmg/bossDmgMax[entry.type]).toFixed(2)
             const bossTrashScore =  (entry.bossTrashDmg/bossTrashDmgMax[entry.type]).toFixed(2)
             entry.bossScore = bossScore
@@ -81,8 +90,7 @@ class DashboardPage extends Component{
     }
 
     render() {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts} = this.props
-        const dataSource = bossDmg && bossTrashDmg && bossTrashSunderCasts && this.generateSource(bossDmg, bossTrashDmg, bossTrashSunderCasts)
+        const dataSource =  this.generateSource()
         const columns = [
             {
                 title: 'ID',
@@ -151,6 +159,11 @@ class DashboardPage extends Component{
                 title: '战士有效破甲数量',
                 dataIndex: 'sunderCasts',
                 render: (text,record)=> record.type ==='Warrior' ? text : ''
+            },
+            {
+                title: '软泥毒箭DOT伤害次数',
+                dataIndex: 'poisonTicks',
+                sorter: (a, b) => a.poisonTicks-b.poisonTicks,
             },
             {
                 title: 'BOSS分',

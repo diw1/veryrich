@@ -9,7 +9,6 @@ function getDMGdone (reportID) {
     return getData(url)
 }
 
-
 function getBOSSDMG (reportID) {
     const url = `${globalConstants.BASE_URL}report/tables/damage-done/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&targetclass=boss`
     return getData(url)
@@ -30,11 +29,16 @@ function getFight (reportID) {
     return getData(url)
 }
 
+function getDamageTakenByAbility (reportID, abilityId) {
+    const url = `${globalConstants.BASE_URL}report/tables/damage-taken/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}`
+    return getData(url)
+}
 
 export default {
     getDMGdone,
     getBOSSDMG,
     getBOSSTrashDmg,
     getBOSSTrashCast,
-    getFight
+    getFight,
+    getDamageTakenByAbility
 }

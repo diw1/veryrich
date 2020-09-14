@@ -1,6 +1,7 @@
 import service from '../services/index'
 import {actions} from 'mirrorx'
 import _ from 'lodash'
+import {globalConstants} from '../globalConstants'
 
 export default {
     name: 'report',
@@ -8,7 +9,8 @@ export default {
         dmg: null,
         bossDmg:null,
         fight:null,
-        bossTrashDmg:null
+        bossTrashDmg:null,
+        poisonDmgTaken: null,
     },
     reducers: {
         save(state, data) {
@@ -27,6 +29,13 @@ export default {
             const result = await service.getDMGdone(reportId)
             actions.report.save({
                 dmg: result.data.entries
+            })
+        },
+
+        async getPoisonDmgTaken(reportId){
+            const result = await service.getDamageTakenByAbility(reportId, globalConstants.POISONID)
+            actions.report.save({
+                poisonDmgTaken: result.data.entries
             })
         },
 
