@@ -175,12 +175,8 @@ class DashboardPage extends Component{
             {
                 title: '战士有效破甲数量',
                 dataIndex: 'sunderCasts',
-                render: (text,record)=> record.type ==='Warrior' ? text : ''
-            },
-            {
-                title: '软泥毒箭DOT伤害次数',
-                dataIndex: 'poisonTicks',
-                sorter: (a, b) => a.poisonTicks-b.poisonTicks,
+                render: (text,record)=> record.type ==='Warrior' ? text : '',
+                sorter: (a, b) => a.sunderCasts-b.sunderCasts,
             },
             {
                 title: '三宝恐惧持续时间',
@@ -188,14 +184,22 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.fearTime-b.fearTime,
             },
             {
-                title: '维希度斯近战冰冻次数',
-                dataIndex: 'meleeFrost',
-                sorter: (a, b) => a.meleeFrost-b.meleeFrost,
-            },
-            {
-                title: '维希度斯魔杖次数',
-                dataIndex: 'visShots',
-                sorter: (a, b) => a.visShots-b.visShots,
+                title: '维希度斯',
+                children: [{
+                    title: '毒箭DOT伤害次数',
+                    dataIndex: 'poisonTicks',
+                    sorter: (a, b) => a.poisonTicks-b.poisonTicks,
+                },
+                {
+                    title: '近战冰冻次数',
+                    dataIndex: 'meleeFrost',
+                    sorter: (a, b) => a.meleeFrost-b.meleeFrost,
+                },
+                {
+                    title: '远程魔杖次数',
+                    dataIndex: 'visShots',
+                    sorter: (a, b) => a.visShots-b.visShots,
+                },]
             },
             {
                 title: 'BOSS分',
