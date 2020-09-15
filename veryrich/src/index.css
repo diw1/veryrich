@@ -13,3 +13,47 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.Hunter{
+  background: #AAD372;
+  color: white;
+}
+
+.Priest{
+  background: #F0EBE0;
+  color: black;
+}
+
+.Druid{
+  background: #FF7C0A;
+  color: white;
+}
+
+.Rogue{
+  background: #FFD268;
+  color: black;
+}
+
+.Mage{
+  background: #68CCEF;
+  color: white;
+}
+
+.Warlock{
+  background: #9382C9;
+  color: white;
+}
+
+.Warrior{
+  background: #C69B6D;
+  color: white;
+}
+
+.Paladin,.Shaman{
+  background: #F48CBA;
+  color: white;
+}
+
+td.ant-table-column-sort{
+  background: inherit;
+}

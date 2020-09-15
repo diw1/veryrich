@@ -8,7 +8,7 @@ import logger from 'redux-logger'
 import mirror, { Router, Switch, render, Route } from 'mirrorx'
 
 mirror.model(reportModel)
-mirror.defaults({
+process.env.NODE_ENV === 'development' && mirror.defaults({
     middlewares : [logger]
 })
 

@@ -12,6 +12,8 @@ export default {
         bossTrashDmg:null,
         poisonDmgTaken: null,
         fearDebuff: null,
+        viscidusCasts: null,
+        viscidusMeleeFrost: null,
     },
     reducers: {
         save(state, data) {
@@ -108,10 +110,39 @@ export default {
                     actions.report.save({
                         bossTrashSunderCasts: result
                     })
+
                 })
             })
         },
 
+        async getViscidusCasts({reportId, viscidusId}){
+            const result = await service.getBOSSTrashCast(reportId, viscidusId)
+            actions.report.save({
+                viscidusCasts: result.data.entries
+            })
+        },
+
+        async getViscidusFrosts({reportId, viscidusId}){
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.OILFROSTID, viscidusId))
+            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.WEAPONFROSTID, viscidusId))
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.meleeFrost = res.meleeFrost || 0
+                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.hitCount
+                        res.meleeFrost =  Number.isInteger(newCast) ? res.meleeFrost + newCast : res.meleeFrost
+                        return res
+                    })
+                    actions.report.save({
+                        viscidusMeleeFrost: result
+                    })
+
+                })
+            })
+        },
 
         async getBOSSDmg(reportId){
             const result = await service.getBOSSDMG(reportId)

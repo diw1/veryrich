@@ -2,8 +2,6 @@ import { getData } from './axios'
 import {globalConstants} from '../globalConstants'
 
 
-
-
 function getDMGdone (reportID) {
     const url = `${globalConstants.BASE_URL}report/tables/damage-done/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}`
     return getData(url)
@@ -34,6 +32,11 @@ function getDamageTakenByAbility (reportID, abilityId) {
     return getData(url)
 }
 
+function getDamageDoneByAbilityAndTarget (reportID, abilityId, targetId) {
+    const url = `${globalConstants.BASE_URL}report/tables/damage-done/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}&targetid=${targetId}`
+    return getData(url)
+}
+
 function getDebuffsByAbility (reportID, abilityId) {
     const url = `${globalConstants.BASE_URL}report/tables/debuffs/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}`
     return getData(url)
@@ -46,5 +49,6 @@ export default {
     getBOSSTrashCast,
     getFight,
     getDamageTakenByAbility,
-    getDebuffsByAbility
+    getDebuffsByAbility,
+    getDamageDoneByAbilityAndTarget
 }

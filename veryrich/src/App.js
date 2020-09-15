@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {Button, Input, Table, Card} from 'antd'
 import {actions, connect} from 'mirrorx'
 import {globalConstants} from './globalConstants'
+import './index.css'
 
 const mapStateToProps = state => ({
     bossDmg: state.report.bossDmg,
@@ -10,6 +11,8 @@ const mapStateToProps = state => ({
     bossTrashSunderCasts: state.report.bossTrashSunderCasts,
     poisonDmgTaken: state.report.poisonDmgTaken,
     fearDebuff: state.report.fearDebuff,
+    viscidusCasts: state.report.viscidusCasts,
+    viscidusMeleeFrost: state.report.viscidusMeleeFrost,
 })
 
 class DashboardPage extends Component{
@@ -34,10 +37,15 @@ class DashboardPage extends Component{
             promises = []
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
             const bossIds = this.findTargetIds(globalConstants.BOSSIDS, this.props.fight)
+            const viscidusId = this.findTargetIds([globalConstants.VISCIDUSID], this.props.fight)
             const bossTrashIds = this.findTargetIds(globalConstants.EXTRABOSSIDS, this.props.fight)
             promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}))
             promises.push(actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report}))
-            promises.push(actions.report.getBossTrashSunderCasts({trashIds: trashIds.concat(bossIds), reportId: this.state.report}))
+            promises.push(actions.report.getViscidusCasts({viscidusId, reportId: this.state.report}))
+            promises.push(actions.report.getViscidusFrosts({viscidusId, reportId: this.state.report}))
+            promises.push(actions.report.getBossTrashSunderCasts({
+                trashIds: trashIds.concat(bossIds),
+                reportId: this.state.report}))
             Promise.all(promises).then(()=>{
                 this.setState({loading: false})
             })
@@ -58,15 +66,18 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusMeleeFrost} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
         let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
+            const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
             const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
             const fearTime = fearDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 || ''
+            const visShots = viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
+                '射击')?.total || 0
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
             return {
@@ -76,9 +87,11 @@ class DashboardPage extends Component{
                 bossDmg: entry.total,
                 bossDps: (entry.total/bossTime).toFixed(2),
                 bossTrashDmg: trashDmg,
-                poisonTicks: poisonTicks,
-                fearTime: fearTime,
-                sunderCasts: sunderCasts,
+                poisonTicks,
+                fearTime,
+                sunderCasts,
+                visShots,
+                meleeFrost
             }
         })
 
@@ -175,6 +188,16 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.fearTime-b.fearTime,
             },
             {
+                title: '维希度斯近战冰冻次数',
+                dataIndex: 'meleeFrost',
+                sorter: (a, b) => a.meleeFrost-b.meleeFrost,
+            },
+            {
+                title: '维希度斯魔杖次数',
+                dataIndex: 'visShots',
+                sorter: (a, b) => a.visShots-b.visShots,
+            },
+            {
                 title: 'BOSS分',
                 dataIndex: 'bossScore',
             },
@@ -197,6 +220,7 @@ class DashboardPage extends Component{
                 <Button onClick={this.submit}>提交</Button>
             </div>}>
                 <Table
+                    rowClassName={record=>record.type}
                     size="small"
                     loading={this.state.loading}
                     dataSource={dataSource}
