@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Button, Input, Table, Card} from 'antd'
+import {Button, Input, Table, Card, Tooltip} from 'antd'
 import {actions, connect} from 'mirrorx'
 import {globalConstants} from './globalConstants'
 import './index.css'
@@ -11,6 +11,7 @@ const mapStateToProps = state => ({
     bossTrashSunderCasts: state.report.bossTrashSunderCasts,
     poisonDmgTaken: state.report.poisonDmgTaken,
     fearDebuff: state.report.fearDebuff,
+    veknissDebuff: state.report.veknissDebuff,
     viscidusCasts: state.report.viscidusCasts,
     viscidusMeleeFrost: state.report.viscidusMeleeFrost,
 })
@@ -33,6 +34,7 @@ class DashboardPage extends Component{
         promises.push(actions.report.getFight(this.state.report))
         promises.push(actions.report.getPoisonDmgTaken(this.state.report))
         promises.push(actions.report.getFearDebuff(this.state.report))
+        promises.push(actions.report.getVeknissDebuff(this.state.report))
         Promise.all(promises).then(()=>{
             promises = []
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
@@ -66,7 +68,7 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusMeleeFrost} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusMeleeFrost, veknissDebuff} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
@@ -76,6 +78,7 @@ class DashboardPage extends Component{
             const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
             const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
             const fearTime = fearDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 || ''
+            const veknissDetail = veknissDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.bands?.map(band=>band.endTime-band.startTime)
             const visShots = viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
                 '射击')?.total || 0
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
@@ -89,6 +92,7 @@ class DashboardPage extends Component{
                 bossTrashDmg: trashDmg,
                 poisonTicks,
                 fearTime,
+                veknissDetail,
                 sunderCasts,
                 visShots,
                 meleeFrost
@@ -200,6 +204,15 @@ class DashboardPage extends Component{
                     dataIndex: 'visShots',
                     sorter: (a, b) => a.visShots-b.visShots,
                 },]
+            },
+            {
+                title: '维克尼斯催化大于1.5秒次数',
+                dataIndex: 'veknissDetail',
+                render: (text, record) => {
+                    return <Tooltip title={<div>{record.veknissDetail?.map((item, i) => <div key={i}>{item / 1000}秒</div>)}</div>}>
+                        {record.veknissDetail?.filter(record => record > globalConstants.VEKNISS_THRESHOLD).length}
+                    </Tooltip>
+                }
             },
             {
                 title: 'BOSS分',

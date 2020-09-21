@@ -11,4 +11,6 @@ export const globalConstants = {
     OILFROSTID:205,
     SHOTID: 5019,
     VISCIDUSID:15299,
+    VEKNISSID:26078,
+    VEKNISS_THRESHOLD: 1500, //ms
 }

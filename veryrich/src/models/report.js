@@ -14,6 +14,7 @@ export default {
         fearDebuff: null,
         viscidusCasts: null,
         viscidusMeleeFrost: null,
+        veknissDebuff: null,
     },
     reducers: {
         save(state, data) {
@@ -46,6 +47,13 @@ export default {
             const result = await service.getDebuffsByAbility(reportId, globalConstants.FEARID)
             actions.report.save({
                 fearDebuff: result.data.auras
+            })
+        },
+
+        async getVeknissDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.VEKNISSID)
+            actions.report.save({
+                veknissDebuff: result.data.auras
             })
         },
 

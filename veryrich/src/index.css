@@ -57,3 +57,7 @@ code {
 td.ant-table-column-sort{
   background: inherit;
 }
+
+.ant-table-tbody > tr.ant-table-row:hover > td{
+  background: unset;
+}
