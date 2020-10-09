@@ -1,25 +1,25 @@
 {
   "files": {
     "main.css": "/veryrich/static/css/main.81ccd65a.chunk.css",
-    "main.js": "/veryrich/static/js/main.80eb91b5.chunk.js",
-    "main.js.map": "/veryrich/static/js/main.80eb91b5.chunk.js.map",
+    "main.js": "/veryrich/static/js/main.3318b851.chunk.js",
+    "main.js.map": "/veryrich/static/js/main.3318b851.chunk.js.map",
     "runtime-main.js": "/veryrich/static/js/runtime-main.52ffc21d.js",
     "runtime-main.js.map": "/veryrich/static/js/runtime-main.52ffc21d.js.map",
     "static/css/2.c27a359e.chunk.css": "/veryrich/static/css/2.c27a359e.chunk.css",
-    "static/js/2.3c2bc63d.chunk.js": "/veryrich/static/js/2.3c2bc63d.chunk.js",
-    "static/js/2.3c2bc63d.chunk.js.map": "/veryrich/static/js/2.3c2bc63d.chunk.js.map",
+    "static/js/2.37389300.chunk.js": "/veryrich/static/js/2.37389300.chunk.js",
+    "static/js/2.37389300.chunk.js.map": "/veryrich/static/js/2.37389300.chunk.js.map",
     "index.html": "/veryrich/index.html",
-    "precache-manifest.11b588115e508fe592ab0c83bd186ca3.js": "/veryrich/precache-manifest.11b588115e508fe592ab0c83bd186ca3.js",
+    "precache-manifest.b1845e6e56617533a0f0d6d8098d3738.js": "/veryrich/precache-manifest.b1845e6e56617533a0f0d6d8098d3738.js",
     "service-worker.js": "/veryrich/service-worker.js",
     "static/css/2.c27a359e.chunk.css.map": "/veryrich/static/css/2.c27a359e.chunk.css.map",
     "static/css/main.81ccd65a.chunk.css.map": "/veryrich/static/css/main.81ccd65a.chunk.css.map",
-    "static/js/2.3c2bc63d.chunk.js.LICENSE.txt": "/veryrich/static/js/2.3c2bc63d.chunk.js.LICENSE.txt"
+    "static/js/2.37389300.chunk.js.LICENSE.txt": "/veryrich/static/js/2.37389300.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.52ffc21d.js",
     "static/css/2.c27a359e.chunk.css",
-    "static/js/2.3c2bc63d.chunk.js",
+    "static/js/2.37389300.chunk.js",
     "static/css/main.81ccd65a.chunk.css",
-    "static/js/main.80eb91b5.chunk.js"
+    "static/js/main.3318b851.chunk.js"
   ]
 }
