@@ -78,7 +78,7 @@ export default {
             })
         },
 
-        async getExtraBossDmg({reportId, bossTrashIds}){
+        async getExtraBossDmg({reportId, bossTrashIds, viscidusId}){
             let result = actions.report.getS().report.bossDmg
             let promises = []
             bossTrashIds.map(trashId=> {
@@ -95,6 +95,18 @@ export default {
                     actions.report.save({
                         bossDmg: result
                     })
+                })
+            })
+            // Remove viscidus damage
+            service.getBOSSTrashDmg(reportId, viscidusId).then(trashRecord=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newDmg = trashRecord.data.entries.find(i=>i.id===entry.id)?.total
+                    res.total = Number.isInteger(newDmg) ? res.total - newDmg : res.total
+                    return res
+                })
+                actions.report.save({
+                    bossDmg: result
                 })
             })
         },

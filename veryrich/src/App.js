@@ -42,7 +42,7 @@ class DashboardPage extends Component{
             const viscidusId = this.findTargetIds([globalConstants.VISCIDUSID], this.props.fight)
             const bossTrashIds = this.findTargetIds(globalConstants.EXTRABOSSIDS, this.props.fight)
             promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}))
-            promises.push(actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report}))
+            promises.push(actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report, viscidusId}))
             promises.push(actions.report.getViscidusCasts({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getViscidusFrosts({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getBossTrashSunderCasts({
