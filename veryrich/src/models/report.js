@@ -14,6 +14,7 @@ export default {
         fearDebuff: null,
         viscidusCasts: null,
         viscidusMeleeFrost: null,
+        viscidusBanned: null,
         veknissDebuff: null,
     },
     reducers: {
@@ -129,6 +130,28 @@ export default {
                     })
                     actions.report.save({
                         bossTrashSunderCasts: result
+                    })
+
+                })
+            })
+        },
+
+        async getViscidusBanned({reportId, viscidusId}){
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.BLOODTHIRSTID, viscidusId))
+            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.EXECUTEID, viscidusId))
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.banned = res.banned || 0
+                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.hitCount
+                        res.banned =  Number.isInteger(newCast) ? res.banned + newCast : res.banned
+                        return res
+                    })
+                    actions.report.save({
+                        viscidusBanned: result
                     })
 
                 })

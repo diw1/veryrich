@@ -14,6 +14,8 @@ const mapStateToProps = state => ({
     veknissDebuff: state.report.veknissDebuff,
     viscidusCasts: state.report.viscidusCasts,
     viscidusMeleeFrost: state.report.viscidusMeleeFrost,
+    viscidusBanned: state.report.viscidusBanned,
+
 })
 
 class DashboardPage extends Component{
@@ -45,6 +47,7 @@ class DashboardPage extends Component{
             promises.push(actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report, viscidusId}))
             promises.push(actions.report.getViscidusCasts({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getViscidusFrosts({viscidusId, reportId: this.state.report}))
+            promises.push(actions.report.getViscidusBanned({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getBossTrashSunderCasts({
                 trashIds: trashIds.concat(bossIds),
                 reportId: this.state.report}))
@@ -68,7 +71,8 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusMeleeFrost, veknissDebuff} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusBanned,
+            viscidusMeleeFrost, veknissDebuff} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
@@ -76,6 +80,7 @@ class DashboardPage extends Component{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
             const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
+            const banned = viscidusBanned?.find(trashEntry=>trashEntry.id===entry.id)?.banned
             const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
             const fearTime = fearDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 || ''
             const veknissDetail = veknissDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.bands?.map(band=>band.endTime-band.startTime)
@@ -95,7 +100,8 @@ class DashboardPage extends Component{
                 veknissDetail,
                 sunderCasts,
                 visShots,
-                meleeFrost
+                meleeFrost,
+                banned
             }
         })
 
@@ -198,6 +204,11 @@ class DashboardPage extends Component{
                     title: '近战冰冻次数',
                     dataIndex: 'meleeFrost',
                     sorter: (a, b) => a.meleeFrost-b.meleeFrost,
+                },
+                {
+                    title: '近战对本体嗜血斩杀次数',
+                    dataIndex: 'banned',
+                    sorter: (a, b) => a.banned-b.banned,
                 },
                 {
                     title: '远程魔杖次数',
