@@ -15,7 +15,8 @@ const mapStateToProps = state => ({
     viscidusCasts: state.report.viscidusCasts,
     viscidusMeleeFrost: state.report.viscidusMeleeFrost,
     viscidusBanned: state.report.viscidusBanned,
-
+    manaPotion: state.report.manaPotion,
+    runes: state.report.runes
 })
 
 class DashboardPage extends Component{
@@ -48,6 +49,8 @@ class DashboardPage extends Component{
             promises.push(actions.report.getViscidusCasts({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getViscidusFrosts({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getViscidusBanned({viscidusId, reportId: this.state.report}))
+            promises.push(actions.report.getManaPotion(this.state.report))
+            promises.push(actions.report.getRunes(this.state.report))
             promises.push(actions.report.getBossTrashSunderCasts({
                 trashIds: trashIds.concat(bossIds),
                 reportId: this.state.report}))
@@ -72,20 +75,25 @@ class DashboardPage extends Component{
 
     generateSource = () => {
         const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusBanned,
-            viscidusMeleeFrost, veknissDebuff} = this.props
+            viscidusMeleeFrost, veknissDebuff, manaPotion, runes} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
         let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
+            const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total
+            const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
             const banned = viscidusBanned?.find(trashEntry=>trashEntry.id===entry.id)?.banned
             const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
             const fearTime = fearDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 || ''
             const veknissDetail = veknissDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.bands?.map(band=>band.endTime-band.startTime)
             const visShots = viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
-                '射击')?.total || 0
+                '射击')?.total || viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
+                '冰霜震击')?.total ||0
+            const visEyeShot = viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
+                '冰冻之眼')?.total || 0
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
             return {
@@ -101,7 +109,10 @@ class DashboardPage extends Component{
                 sunderCasts,
                 visShots,
                 meleeFrost,
-                banned
+                banned,
+                visEyeShot,
+                manaPotionCasts,
+                runesCasts
             }
         })
 
@@ -214,7 +225,13 @@ class DashboardPage extends Component{
                     title: '远程魔杖次数',
                     dataIndex: 'visShots',
                     sorter: (a, b) => a.visShots-b.visShots,
-                },]
+                },
+                {
+                    title: '使用蜥蜴眼',
+                    dataIndex: 'visEyeShot',
+                    render: text => text=='1' ? '是' : '否'
+                },
+                ]
             },
             {
                 title: '维克尼斯催化大于1.5秒次数',
@@ -224,6 +241,16 @@ class DashboardPage extends Component{
                         {record.veknissDetail?.filter(record => record > globalConstants.VEKNISS_THRESHOLD).length}
                     </Tooltip>
                 }
+            },
+            {
+                title: '大蓝使用量',
+                dataIndex: 'manaPotionCasts',
+                sorter: (a, b) => a.manaPotionCasts-b.manaPotionCasts,
+            },
+            {
+                title: '符文使用量',
+                dataIndex: 'runesCasts',
+                sorter: (a, b) => a.runesCasts-b.runesCasts,
             },
             {
                 title: 'BOSS分',

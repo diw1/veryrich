@@ -16,6 +16,8 @@ export default {
         viscidusMeleeFrost: null,
         viscidusBanned: null,
         veknissDebuff: null,
+        manaPotion: null,
+        runes: null,
     },
     reducers: {
         save(state, data) {
@@ -200,5 +202,35 @@ export default {
                 fight: result.data
             })
         },
+
+        async getManaPotion(reportId){
+            const result = await service.getCastsByAbility(reportId, globalConstants.MANA_POTIONID)
+            actions.report.save({
+                manaPotion: result.data.entries
+            })
+        },
+
+        async getRunes(reportId){
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            promises.push(service.getCastsByAbility(reportId, globalConstants.DARK_RUNEID))
+            promises.push(service.getCastsByAbility(reportId, globalConstants.DEMON_RUNEID))
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.runes = res.runes || 0
+                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.total
+                        res.runes =  Number.isInteger(newCast) ? res.runes + newCast : res.runes
+                        return res
+                    })
+                    actions.report.save({
+                        runes: result
+                    })
+
+                })
+            })
+        },
+
     }
 }

@@ -15,4 +15,7 @@ export const globalConstants = {
     VISCIDUSID:15299,
     VEKNISSID:26078,
     VEKNISS_THRESHOLD: 1500, //ms
+    MANA_POTIONID: 17531,
+    DARK_RUNEID:27869,
+    DEMON_RUNEID: 16666,
 }
