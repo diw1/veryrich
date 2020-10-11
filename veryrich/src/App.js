@@ -82,7 +82,7 @@ class DashboardPage extends Component{
         let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
-            const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total
+            const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
             const banned = viscidusBanned?.find(trashEntry=>trashEntry.id===entry.id)?.banned
@@ -96,6 +96,8 @@ class DashboardPage extends Component{
                 '冰冻之眼')?.total || 0
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
+            console.log(manaPotionCasts, runesCasts)
+
             return {
                 id: entry.id,
                 name: entry.name,
