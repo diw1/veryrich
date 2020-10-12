@@ -96,7 +96,6 @@ class DashboardPage extends Component{
                 '冰冻之眼')?.total || 0
             bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
             bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
-            console.log(manaPotionCasts, runesCasts)
 
             return {
                 id: entry.id,
