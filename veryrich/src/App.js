@@ -16,7 +16,9 @@ const mapStateToProps = state => ({
     viscidusMeleeFrost: state.report.viscidusMeleeFrost,
     viscidusBanned: state.report.viscidusBanned,
     manaPotion: state.report.manaPotion,
-    runes: state.report.runes
+    runes: state.report.runes,
+    swiftBoot: state.report.swiftBoot,
+    stopWatch: state.report.stopWatch,
 })
 
 class DashboardPage extends Component{
@@ -50,6 +52,8 @@ class DashboardPage extends Component{
             promises.push(actions.report.getViscidusFrosts({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getViscidusBanned({viscidusId, reportId: this.state.report}))
             promises.push(actions.report.getManaPotion(this.state.report))
+            promises.push(actions.report.getSwiftBoot(this.state.report))
+            promises.push(actions.report.getStopWatch(this.state.report))
             promises.push(actions.report.getRunes(this.state.report))
             promises.push(actions.report.getBossTrashSunderCasts({
                 trashIds: trashIds.concat(bossIds),
@@ -75,7 +79,7 @@ class DashboardPage extends Component{
 
     generateSource = () => {
         const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusBanned,
-            viscidusMeleeFrost, veknissDebuff, manaPotion, runes} = this.props
+            viscidusMeleeFrost, veknissDebuff, manaPotion, runes, swiftBoot, stopWatch,} = this.props
         let bossDmgMax = {}
         let bossTrashDmgMax = {}
         const bossTime = this.calculateBossTime(this.props.fight)
@@ -83,6 +87,8 @@ class DashboardPage extends Component{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
+            const swiftBootCasts = swiftBoot?.find(trashEntry=>trashEntry.id===entry.id)?.total ? '是' : '否'
+            const stopWatchCasts = stopWatch?.find(trashEntry=>trashEntry.id===entry.id)?.total ? '是' : '否'
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
             const banned = viscidusBanned?.find(trashEntry=>trashEntry.id===entry.id)?.banned
@@ -104,6 +110,8 @@ class DashboardPage extends Component{
                 bossDmg: entry.total,
                 bossDps: (entry.total/bossTime).toFixed(2),
                 bossTrashDmg: trashDmg,
+                stopWatchCasts,
+                swiftBootCasts,
                 poisonTicks,
                 fearTime,
                 veknissDetail,
@@ -195,20 +203,30 @@ class DashboardPage extends Component{
                 defaultSortOrder: 'descend',
             },
             {
-                title: '战士有效破甲数量',
+                title: '战士有效破甲',
                 dataIndex: 'sunderCasts',
                 render: (text,record)=> record.type ==='Warrior' ? text : '',
                 sorter: (a, b) => a.sunderCasts-b.sunderCasts,
             },
             {
-                title: '三宝恐惧持续时间',
+                title: '三宝恐惧时间',
                 dataIndex: 'fearTime',
                 sorter: (a, b) => a.fearTime-b.fearTime,
             },
             {
+                title: '移速道具',
+                children:[{
+                    title: '灵巧秒表',
+                    dataIndex: 'stopWatchCasts',
+                },
+                {
+                    title: '迅捷之鞋',
+                    dataIndex: 'swiftBootCasts',
+                }]},
+            {
                 title: '维希度斯',
                 children: [{
-                    title: '毒箭DOT伤害次数',
+                    title: '毒箭DOT次数',
                     dataIndex: 'poisonTicks',
                     sorter: (a, b) => a.poisonTicks-b.poisonTicks,
                 },
@@ -218,7 +236,7 @@ class DashboardPage extends Component{
                     sorter: (a, b) => a.meleeFrost-b.meleeFrost,
                 },
                 {
-                    title: '近战对本体嗜血斩杀次数',
+                    title: '近战对本体嗜血斩杀',
                     dataIndex: 'banned',
                     sorter: (a, b) => a.banned-b.banned,
                 },

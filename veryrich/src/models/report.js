@@ -18,6 +18,8 @@ export default {
         veknissDebuff: null,
         manaPotion: null,
         runes: null,
+        swiftBoot: null,
+        stopWatch: null,
     },
     reducers: {
         save(state, data) {
@@ -207,6 +209,20 @@ export default {
             const result = await service.getCastsByAbility(reportId, globalConstants.MANA_POTIONID)
             actions.report.save({
                 manaPotion: result.data.entries
+            })
+        },
+
+        async getStopWatch(reportId){
+            const result = await service.getCastsByAbility(reportId, globalConstants.STOPWATCH_ID)
+            actions.report.save({
+                stopWatch: result.data.entries
+            })
+        },
+
+        async getSwiftBoot(reportId){
+            const result = await service.getCastsByAbility(reportId, globalConstants.SWIFT_BOOT_ID)
+            actions.report.save({
+                swiftBoot: result.data.entries
             })
         },
 
