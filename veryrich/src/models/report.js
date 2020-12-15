@@ -8,14 +8,15 @@ export default {
     initialState: {
         dmg: null,
         bossDmg:null,
+        filteredBossDmg:null,
         fight:null,
         bossTrashDmg:null,
         poisonDmgTaken: null,
-        fearDebuff: null,
-        viscidusCasts: null,
+        chainDebuff: null,
+        webWrapDebuff: null,
         viscidusMeleeFrost: null,
         viscidusBanned: null,
-        veknissDebuff: null,
+        hunterAura: null,
         manaPotion: null,
         runes: null,
         swiftBoot: null,
@@ -48,21 +49,22 @@ export default {
             })
         },
 
-        async getFearDebuff(reportId){
-            const result = await service.getDebuffsByAbility(reportId, globalConstants.FEARID)
+
+        async getChainDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.CHAINID)
             actions.report.save({
-                fearDebuff: result.data.auras
+                chainDebuff: result.data.auras
             })
         },
 
-        async getVeknissDebuff(reportId){
-            const result = await service.getDebuffsByAbility(reportId, globalConstants.VEKNISSID)
+        async getWebWrapDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.WEBWRAPID)
             actions.report.save({
-                veknissDebuff: result.data.auras
+                webWrapDebuff: result.data.auras
             })
         },
 
-        async getBossTrashDmg({reportId, trashIds}){
+        async getBossTrashDmg({reportId, trashIds, removedBossIds}){
             let result = actions.report.getS().report.bossDmg
             let promises = []
             trashIds.map(trashId=> {
@@ -81,12 +83,29 @@ export default {
                     })
                 })
             })
+            let newPromises = []
+            removedBossIds.map(trashId=> {
+                newPromises.push(service.getBOSSTrashDmg(reportId, trashId))
+            })
+            Promise.all(newPromises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        const newDmg = trashRecord.data.entries.find(i=>i.id===entry.id)?.total
+                        res.total = Number.isInteger(newDmg) ? res.total - newDmg : res.total
+                        return res
+                    })
+                    actions.report.save({
+                        bossTrashDmg: result
+                    })
+                })
+            })
         },
 
-        async getExtraBossDmg({reportId, bossTrashIds, viscidusId}){
-            let result = actions.report.getS().report.bossDmg
+        async getExcludedBossDmg({reportId, removedBossIds}){
+            let result = actions.report.getS().report.filteredBossDmg
             let promises = []
-            bossTrashIds.map(trashId=> {
+            removedBossIds.map(trashId=> {
                 promises.push(service.getBOSSTrashDmg(reportId, trashId))
             })
             Promise.all(promises).then(trashRecords=>{
@@ -94,26 +113,15 @@ export default {
                     result = result.map(entry=>{
                         let res = _.cloneDeep(entry)
                         const newDmg = trashRecord.data.entries.find(i=>i.id===entry.id)?.total
-                        res.total = Number.isInteger(newDmg) ? res.total + newDmg : res.total
+                        res.total = Number.isInteger(newDmg) ? res.total - newDmg : res.total
                         return res
                     })
                     actions.report.save({
-                        bossDmg: result
+                        filteredBossDmg: result
                     })
                 })
             })
-            // Remove viscidus damage
-            service.getBOSSTrashDmg(reportId, viscidusId).then(trashRecord=>{
-                result = result.map(entry=>{
-                    let res = _.cloneDeep(entry)
-                    const newDmg = trashRecord.data.entries.find(i=>i.id===entry.id)?.total
-                    res.total = Number.isInteger(newDmg) ? res.total - newDmg : res.total
-                    return res
-                })
-                actions.report.save({
-                    bossDmg: result
-                })
-            })
+
         },
 
         async getBossTrashSunderCasts({reportId, trashIds}){
@@ -194,12 +202,15 @@ export default {
         async getBOSSDmg(reportId){
             const result = await service.getBOSSDMG(reportId)
             actions.report.save({
-                bossDmg: result.data.entries
+                bossDmg: result.data.entries,
+                filteredBossDmg: result.data.entries
             })
         },
 
         async getFight(reportId){
             const result = await service.getFight(reportId)
+            // const enemyData = result.data.enemies.filter(enemy=>!globalConstants.EXCLUDEIDS.includes(enemy.guid) && !globalConstants.BOSSIDS.includes(enemy.guid)).map(enemy=>enemy.guid)
+            // console.log(enemyData,'emenydata')
             actions.report.save({
                 fight: result.data
             })
@@ -248,5 +259,11 @@ export default {
             })
         },
 
+        async getHunterbuff(reportId){
+            const result = await service.getBuffsByAbility(reportId, globalConstants.HUNTERAURA)
+            actions.report.save({
+                hunterAura: result.data.auras
+            })
+        },
     }
 }

@@ -1,24 +1,21 @@
 import React, {Component} from 'react'
 import {Button, Input, Table, Card, Tooltip} from 'antd'
+import {QuestionCircleOutlined} from '@ant-design/icons'
 import {actions, connect} from 'mirrorx'
 import {globalConstants} from './globalConstants'
 import './index.css'
 
 const mapStateToProps = state => ({
     bossDmg: state.report.bossDmg,
+    filteredBossDmg: state.report.filteredBossDmg,
     fight: state.report.fight,
     bossTrashDmg: state.report.bossTrashDmg,
     bossTrashSunderCasts: state.report.bossTrashSunderCasts,
-    poisonDmgTaken: state.report.poisonDmgTaken,
-    fearDebuff: state.report.fearDebuff,
-    veknissDebuff: state.report.veknissDebuff,
-    viscidusCasts: state.report.viscidusCasts,
-    viscidusMeleeFrost: state.report.viscidusMeleeFrost,
-    viscidusBanned: state.report.viscidusBanned,
+    webWrapDebuff: state.report.webWrapDebuff,
+    chainDebuff: state.report.chainDebuff,
     manaPotion: state.report.manaPotion,
     runes: state.report.runes,
-    swiftBoot: state.report.swiftBoot,
-    stopWatch: state.report.stopWatch,
+    hunterAura: state.report.hunterAura,
 })
 
 class DashboardPage extends Component{
@@ -37,26 +34,20 @@ class DashboardPage extends Component{
 
         promises.push(actions.report.getBOSSDmg(this.state.report))
         promises.push(actions.report.getFight(this.state.report))
-        promises.push(actions.report.getPoisonDmgTaken(this.state.report))
-        promises.push(actions.report.getFearDebuff(this.state.report))
-        promises.push(actions.report.getVeknissDebuff(this.state.report))
         Promise.all(promises).then(()=>{
             promises = []
             const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
-            const bossIds = this.findTargetIds(globalConstants.BOSSIDS, this.props.fight)
-            const viscidusId = this.findTargetIds([globalConstants.VISCIDUSID], this.props.fight)
-            const bossTrashIds = this.findTargetIds(globalConstants.EXTRABOSSIDS, this.props.fight)
-            promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report}))
-            promises.push(actions.report.getExtraBossDmg({bossTrashIds, reportId: this.state.report, viscidusId}))
-            promises.push(actions.report.getViscidusCasts({viscidusId, reportId: this.state.report}))
-            promises.push(actions.report.getViscidusFrosts({viscidusId, reportId: this.state.report}))
-            promises.push(actions.report.getViscidusBanned({viscidusId, reportId: this.state.report}))
+            const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
+            const removedBossIds = this.findTargetIds(globalConstants.REMOVEBOSSIDS, this.props.fight)
+            promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report, removedBossIds}))
+            promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: this.state.report}))
             promises.push(actions.report.getManaPotion(this.state.report))
-            promises.push(actions.report.getSwiftBoot(this.state.report))
-            promises.push(actions.report.getStopWatch(this.state.report))
+            promises.push(actions.report.getChainDebuff(this.state.report))
+            promises.push(actions.report.getWebWrapDebuff(this.state.report))
             promises.push(actions.report.getRunes(this.state.report))
+            promises.push(actions.report.getHunterbuff(this.state.report))
             promises.push(actions.report.getBossTrashSunderCasts({
-                trashIds: trashIds.concat(bossIds),
+                trashIds: trashIds.concat(filteredBossIds),
                 reportId: this.state.report}))
             Promise.all(promises).then(()=>{
                 this.setState({loading: false})
@@ -77,66 +68,56 @@ class DashboardPage extends Component{
         return sum/1000
     }
 
+    calculatedSunderAvg = (sunderCasts) => {
+        let sumWithoutTop4 = sunderCasts?.map(i=>i.sunder).sort((a,b)=>b-a).slice(4).reduce((sum, item)=>sum+item)
+        let furyWarriorCounts = sunderCasts?.filter(item=> item.type ==='Warrior')?.length
+        return Math.floor(sumWithoutTop4/(furyWarriorCounts-4)*0.7)
+    }
+
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, poisonDmgTaken, fearDebuff, viscidusCasts, viscidusBanned,
-            viscidusMeleeFrost, veknissDebuff, manaPotion, runes, swiftBoot, stopWatch,} = this.props
-        let bossDmgMax = {}
-        let bossTrashDmgMax = {}
-        const bossTime = this.calculateBossTime(this.props.fight)
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff} = this.props
+        let finalDmgMax = {}
+        const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
+            const filteredBossDmgData = filteredBossDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
+            const sunderPenalty = sunderCasts < sunderBase && entry.type==='Warrior' ? Math.floor(-0.05 * trashDmg) : 0
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
-            const swiftBootCasts = swiftBoot?.find(trashEntry=>trashEntry.id===entry.id)?.total ? '是' : '否'
-            const stopWatchCasts = stopWatch?.find(trashEntry=>trashEntry.id===entry.id)?.total ? '是' : '否'
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
-            const meleeFrost = viscidusMeleeFrost?.find(trashEntry=>trashEntry.id===entry.id)?.meleeFrost
-            const banned = viscidusBanned?.find(trashEntry=>trashEntry.id===entry.id)?.banned
-            const poisonTicks = poisonDmgTaken?.find(trashEntry=>trashEntry.id===entry.id)?.tickCount
-            const fearTime = fearDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 || ''
-            const veknissDetail = veknissDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.bands?.map(band=>band.endTime-band.startTime)
-            const visShots = viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
-                '射击')?.total || viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
-                '冰霜震击')?.total ||0
-            const visEyeShot = viscidusCasts?.find(trashEntry=>trashEntry.id===entry.id)?.abilities.find(ability=>ability.name===
-                '冰冻之眼')?.total || 0
-            bossDmgMax[entry.type] = bossDmgMax[entry.type] > entry.total ? bossDmgMax[entry.type] : entry.total
-            bossTrashDmgMax[entry.type] = bossTrashDmgMax[entry.type] > trashDmg ? bossTrashDmgMax[entry.type] : trashDmg
-
+            const chainTime = Math.round(chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
+            const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
+            const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
+            const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0
+            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty)
+            finalDmgMax[entry.type] = finalDmgMax[entry.type] > finalDamage ? finalDmgMax[entry.type] : finalDamage
             return {
                 id: entry.id,
                 name: entry.name,
                 type: entry.type,
                 bossDmg: entry.total,
-                bossDps: (entry.total/bossTime).toFixed(2),
                 bossTrashDmg: trashDmg,
-                stopWatchCasts,
-                swiftBootCasts,
-                poisonTicks,
-                fearTime,
-                veknissDetail,
                 sunderCasts,
-                visShots,
-                meleeFrost,
-                banned,
-                visEyeShot,
                 manaPotionCasts,
-                runesCasts
+                runesCasts,
+                filteredBossDmgData,
+                sunderPenalty,
+                hunterAuraPenalty,
+                finalDamage,
+                chainTime,
+                webWrapTime
             }
         })
 
         source = source?.map(entry=>{
-            const bossScore =  (entry.bossDmg/bossDmgMax[entry.type]).toFixed(2)
-            const bossTrashScore =  (entry.bossTrashDmg/bossTrashDmgMax[entry.type]).toFixed(2)
-            entry.bossScore = bossScore
-            entry.bossTrashScore = bossTrashScore
-            entry.finalScore = ((parseFloat(bossScore)+parseFloat(bossTrashScore))/2) .toFixed(2)
+            entry.finalScore = (entry.finalDamage/finalDmgMax[entry.type]).toFixed(2)
             return entry
         })
         return source
     }
 
     render() {
+        const sunderBase = this.calculatedSunderAvg(this.props.bossTrashSunderCasts)
         const dataSource =  this.generateSource()
         const columns = [
             {
@@ -193,73 +174,57 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.bossDmg-b.bossDmg,
             },
             {
-                title: 'Boss DPS',
-                dataIndex: 'bossDps',
+                title: <Tooltip title="去除DK2, DK3，孢子男，电男的伤害">
+                    <span>有效boss伤害<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                dataIndex: 'filteredBossDmgData',
             },
             {
                 title: '全程有效伤害',
                 dataIndex: 'bossTrashDmg',
                 sorter: (a, b) => a.bossTrashDmg-b.bossTrashDmg,
-                defaultSortOrder: 'descend',
             },
             {
-                title: '战士有效破甲',
+                title: <Tooltip title={`平均数的70%为: ${sunderBase}`}>
+                    <span>战士有效破甲<QuestionCircleOutlined /></span>
+                </Tooltip>,
                 dataIndex: 'sunderCasts',
                 render: (text,record)=> record.type ==='Warrior' ? text : '',
-                sorter: (a, b) => a.sunderCasts-b.sunderCasts,
             },
             {
-                title: '三宝恐惧时间',
-                dataIndex: 'fearTime',
-                sorter: (a, b) => a.fearTime-b.fearTime,
+                title: <Tooltip title="扣5%有效伤害">
+                    <span>破甲扣除<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                dataIndex: 'sunderPenalty',
+                render: text=> text !== 0 ? text : null,
             },
             {
-                title: '移速道具',
-                children:[{
-                    title: '灵巧秒表',
-                    dataIndex: 'stopWatchCasts',
-                },
-                {
-                    title: '迅捷之鞋',
-                    dataIndex: 'swiftBootCasts',
-                }]},
+                title: <Tooltip title="扣1.5%有效伤害">
+                    <span>强击光环扣除<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                dataIndex: 'hunterAuraPenalty',
+                render: text=> text !== 0 ? text : null,
+            },
+
             {
-                title: '维希度斯',
-                children: [{
-                    title: '毒箭DOT次数',
-                    dataIndex: 'poisonTicks',
-                    sorter: (a, b) => a.poisonTicks-b.poisonTicks,
-                },
-                {
-                    title: '近战冰冻次数',
-                    dataIndex: 'meleeFrost',
-                    sorter: (a, b) => a.meleeFrost-b.meleeFrost,
-                },
-                {
-                    title: '近战对本体嗜血斩杀',
-                    dataIndex: 'banned',
-                    sorter: (a, b) => a.banned-b.banned,
-                },
-                {
-                    title: '远程魔杖次数',
-                    dataIndex: 'visShots',
-                    sorter: (a, b) => a.visShots-b.visShots,
-                },
-                {
-                    title: '使用蜥蜴眼',
-                    dataIndex: 'visEyeShot',
-                    render: text => text=='1' ? '是' : '否'
-                },
+                title: '老克心控',
+                children: [
+                    {
+                        title: '时间',
+                        dataIndex: 'chainTime',
+                    },
+                    {
+                        title: 'DPS',
+                        dataIndex: 'chainTime',
+                    },
                 ]
             },
+
             {
-                title: '维克尼斯催化大于1.5秒次数',
-                dataIndex: 'veknissDetail',
-                render: (text, record) => {
-                    return <Tooltip title={<div>{record.veknissDetail?.map((item, i) => <div key={i}>{item / 1000}秒</div>)}</div>}>
-                        {record.veknissDetail?.filter(record => record > globalConstants.VEKNISS_THRESHOLD).length}
-                    </Tooltip>
-                }
+                title:<Tooltip title="蜘蛛3上墙">
+                    <span>蛛网裹体时间<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                dataIndex: 'webWrapTime',
             },
             {
                 title: '大蓝使用量',
@@ -272,17 +237,14 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.runesCasts-b.runesCasts,
             },
             {
-                title: 'BOSS分',
-                dataIndex: 'bossScore',
+                title: '总分数',
+                dataIndex: 'finalDamage',
+                sorter: (a, b) => a.finalDamage-b.finalDamage,
+                defaultSortOrder: 'descend',
             },
             {
-                title: '全程分',
-                dataIndex: 'bossTrashScore',
-            },
-            {
-                title: '平均分',
+                title: '总百分比',
                 dataIndex: 'finalScore',
-                sorter: (a, b) => a.finalScore-b.finalScore,
             },
         ]
         return (
