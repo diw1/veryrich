@@ -239,7 +239,7 @@ class DashboardPage extends Component{
             {
                 title: '人工补/扣分',
                 dataIndex: 'manual',
-                render: (text, record) => <Input value={record.manual} onChange={(e)=>this.handleManualChange(e, record)} style={{maxWidth: 100}}/>
+                render: (text, record) => <Input value={record.manual} onBlur={(e)=>this.handleManualChange(e, record)} style={{maxWidth: 100}}/>
             },
             {
                 title: '总分数',
