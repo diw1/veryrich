@@ -75,6 +75,10 @@ class DashboardPage extends Component{
         return Math.floor(sumWithoutTop4/(furyWarriorCounts-4)*0.7)
     }
 
+    calculateManualSum = (manual) => {
+        const newManual = {...manual, id:0}
+        return Object.values(newManual)?.reduce((a, b) => a + b, 0)
+    }
     generateSource = () => {
         const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff} = this.props
         let finalDmgMax = {}
@@ -84,14 +88,14 @@ class DashboardPage extends Component{
             const filteredBossDmgData = filteredBossDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
             const sunderPenalty = sunderCasts < sunderBase && entry.type==='Warrior' ? Math.floor(-0.05 * trashDmg) : 0
-            const manual = this.state.manual.find(trashEntry=>trashEntry.id===entry.id)?.value || 0
+            const manual = this.state.manual.find(trashEntry=>trashEntry.id===entry.id) || {}
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const chainTime = Math.round(chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
             const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0
-            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + Number (manual)
+            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + this.calculateManualSum(manual)
             finalDmgMax[entry.type] = finalDmgMax[entry.type] > finalDamage ? finalDmgMax[entry.type] : finalDamage
             return {
                 id: entry.id,
@@ -107,7 +111,8 @@ class DashboardPage extends Component{
                 hunterAuraPenalty,
                 finalDamage,
                 chainTime,
-                webWrapTime
+                webWrapTime,
+                manual
             }
         })
 
@@ -118,10 +123,10 @@ class DashboardPage extends Component{
         return source
     }
 
-    handleManualChange = (e, record) => {
+    handleManualChange = (e, record, type) => {
         const newManual = this.state.manual.find(item=>item.id == record.id) ?
-            this.state.manual.map(item=>item.id === record.id ? {...item, value: e.target.value} : item) :
-            this.state.manual.concat([{id: record.id, value: e.target.value}])
+            this.state.manual.map(item=>item.id === record.id ? {...item, [type]: Number(e.target.value)} : item) :
+            this.state.manual.concat([{id: record.id, [type]: Number(e.target.value)}])
         this.setState({
             manual: newManual
         })
@@ -217,38 +222,73 @@ class DashboardPage extends Component{
                 render: text=> text !== 0 ? text : null,
             },
             {
-                title: '老克心控时间',
-                dataIndex: 'chainTime',
+                title: '老克心控',
+                children: [
+                    {
+                        title: '时间',
+                        dataIndex: 'chainTime',
+                    },
+                    {
+                        title: '补分',
+                        dataIndex: ['manual','chain'],
+                        render: (text, record) => <Input value={this.state.manual.chain} onBlur={(e)=>this.handleManualChange(e, record, 'chain')} style={{maxWidth: 85}}/>
+                    },
+
+                ]
             },
             {
                 title:<Tooltip title="蜘蛛3上墙">
-                    <span>蛛网裹体时间<QuestionCircleOutlined /></span>
+                    <span>蛛网裹体<QuestionCircleOutlined /></span>
                 </Tooltip>,
-                dataIndex: 'webWrapTime',
+                children: [
+                    {
+                        title: '时间',
+                        dataIndex: 'webWrapTime',
+                    },
+                    {
+                        title: '补分',
+                        dataIndex: ['manual','web'],
+                        render: (text, record) => <Input value={this.state.manual.web} onBlur={(e)=>this.handleManualChange(e, record, 'web')} style={{maxWidth: 85}}/>
+                    },
+
+                ]
             },
             {
-                title: '大蓝使用量',
+                title:<Tooltip title="传送时间无法自动获取">
+                    <span>跳舞男传送<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                children: [
+                    {
+                        title: '补分',
+                        dataIndex: ['manual','tel'],
+                        render: (text, record) => <Input value={this.state.manual.tel} onBlur={(e)=>this.handleManualChange(e, record, 'tel')} style={{maxWidth: 85}}/>
+                    },
+
+                ]
+            },
+            {
+                title: '大蓝',
                 dataIndex: 'manaPotionCasts',
                 sorter: (a, b) => a.manaPotionCasts-b.manaPotionCasts,
             },
             {
-                title: '符文使用量',
+                title: '符文',
                 dataIndex: 'runesCasts',
                 sorter: (a, b) => a.runesCasts-b.runesCasts,
             },
             {
-                title: '人工补/扣分',
-                dataIndex: 'manual',
-                render: (text, record) => <Input value={record.manual} onBlur={(e)=>this.handleManualChange(e, record)} style={{maxWidth: 100}}/>
+                title: '其他补/扣分',
+                dataIndex: ['manual','other'],
+                render: (text, record) => <Input value={this.state.manual.other} onBlur={(e)=>this.handleManualChange(e, record, 'other')} style={{maxWidth: 100}}/>
             },
             {
-                title: '总分数',
+                title: '总分',
                 dataIndex: 'finalDamage',
                 sorter: (a, b) => a.finalDamage-b.finalDamage,
                 defaultSortOrder: 'descend',
             },
             {
-                title: '总百分比',
+                title: '百分比',
                 dataIndex: 'finalScore',
             },
         ]
