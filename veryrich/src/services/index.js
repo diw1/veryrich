@@ -37,8 +37,8 @@ function getDamageDoneByAbilityAndTarget (reportID, abilityId, targetId) {
     return getData(url)
 }
 
-function getDebuffsByAbility (reportID, abilityId) {
-    const url = `${globalConstants.BASE_URL}report/tables/debuffs/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}`
+function getDebuffsByAbility (reportID, abilityId, enemy= false) {
+    const url = `${globalConstants.BASE_URL}report/tables/debuffs/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}&hostility=${enemy?1:0}`
     return getData(url)
 }
 

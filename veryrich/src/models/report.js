@@ -14,7 +14,7 @@ export default {
         poisonDmgTaken: null,
         chainDebuff: null,
         webWrapDebuff: null,
-        viscidusMeleeFrost: null,
+        rogueSunderDebuff: null,
         viscidusBanned: null,
         hunterAura: null,
         manaPotion: null,
@@ -54,6 +54,15 @@ export default {
             const result = await service.getDebuffsByAbility(reportId, globalConstants.CHAINID)
             actions.report.save({
                 chainDebuff: result.data.auras
+            })
+        },
+
+        async getRogueSunderDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.SUNDERDEBUFFID, true)
+            const validIds= [...globalConstants.TRASHIDS, ...globalConstants.BOSSIDS].filter(x=>!globalConstants.REMOVEBOSSIDS.includes(x))
+            console.log(result.data?.auras?.filter(aura=>validIds.includes(aura.guid)))
+            actions.report.save({
+                rogueSunderDebuff: result.data?.auras?.filter(aura=>validIds.includes(aura.guid)).reduce((sum,i)=>sum+Number(i.totalUses),0)
             })
         },
 
@@ -138,6 +147,8 @@ export default {
                         const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.abilities.find(ability=>ability.name===
                             '破甲攻击')?.total
                         res.sunder =  Number.isInteger(newCast) ? res.sunder + newCast : res.sunder
+                        res.rogueSunder = !!trashRecord.data.entries.find(i=>i.id===entry.id)?.abilities.find(ability=>ability.name===
+                            '破甲')
                         return res
                     })
                     actions.report.save({

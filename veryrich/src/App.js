@@ -16,6 +16,7 @@ const mapStateToProps = state => ({
     manaPotion: state.report.manaPotion,
     runes: state.report.runes,
     hunterAura: state.report.hunterAura,
+    rogueSunderDebuff: state.report.rogueSunderDebuff
 })
 
 class DashboardPage extends Component{
@@ -43,6 +44,7 @@ class DashboardPage extends Component{
             promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report, removedBossIds}))
             promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: this.state.report}))
             promises.push(actions.report.getManaPotion(this.state.report))
+            promises.push(actions.report.getRogueSunderDebuff(this.state.report))
             promises.push(actions.report.getChainDebuff(this.state.report))
             promises.push(actions.report.getWebWrapDebuff(this.state.report))
             promises.push(actions.report.getRunes(this.state.report))
@@ -79,15 +81,18 @@ class DashboardPage extends Component{
         const newManual = {...manual, id:0}
         return Object.values(newManual)?.reduce((a, b) => a + b, 0)
     }
+
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff, rogueSunderDebuff} = this.props
         let finalDmgMax = {}
         const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const filteredBossDmgData = filteredBossDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
-            const sunderCasts = bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder
-            const sunderPenalty = sunderCasts < sunderBase && entry.type==='Warrior' ? Math.floor(-0.05 * trashDmg) : 0
+            const sunderCasts = entry.type === 'Warrior' ? bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder :
+                bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.rogueSunder ? rogueSunderDebuff : 0
+            const sunderPenalty = entry.type==='Warrior' ? sunderCasts < sunderBase  ? Math.floor(-0.05 * trashDmg) : 0 :
+                entry.type==='Rogue' ? sunderCasts * 2000 : 0
             const manual = this.state.manual.find(trashEntry=>trashEntry.id===entry.id) || {}
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
@@ -201,15 +206,15 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.bossTrashDmg-b.bossTrashDmg,
             },
             {
-                title: <Tooltip title={`平均数的70%为: ${sunderBase}`}>
-                    <span>战士有效破甲<QuestionCircleOutlined /></span>
+                title: <Tooltip title="贼的破甲为强破">
+                    <span>有效破甲<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'sunderCasts',
-                render: (text,record)=> record.type ==='Warrior' ? text : '',
+                render: (text,record)=> record.type ==='Warrior' || record.type ==='Rogue' ? text : '',
             },
             {
-                title: <Tooltip title="扣5%有效伤害">
-                    <span>破甲扣除<QuestionCircleOutlined /></span>
+                title: <Tooltip title={`平均数的70%为: ${sunderBase}，不足的扣5%有效伤害, 贼每个成功的强破补偿2000伤害`}>
+                    <span>破甲补/扣分<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'sunderPenalty',
                 render: text=> text !== 0 ? text : null,
