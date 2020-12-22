@@ -1,9 +1,14 @@
 import React, {Component} from 'react'
-import {Button, Input, Table, Card, Tooltip} from 'antd'
+import {Button, Input, Table, Card, Tooltip, Col, Row} from 'antd'
 import {QuestionCircleOutlined} from '@ant-design/icons'
 import {actions, connect} from 'mirrorx'
 import {globalConstants} from './globalConstants'
 import './index.css'
+import ReactExport from 'react-data-export'
+
+const ExcelFile = ReactExport.ExcelFile
+const ExcelSheet = ReactExport.ExcelFile.ExcelSheet
+const ExcelColumn = ReactExport.ExcelFile.ExcelColumn
 
 const mapStateToProps = state => ({
     bossDmg: state.report.bossDmg,
@@ -16,7 +21,8 @@ const mapStateToProps = state => ({
     manaPotion: state.report.manaPotion,
     runes: state.report.runes,
     hunterAura: state.report.hunterAura,
-    rogueSunderDebuff: state.report.rogueSunderDebuff
+    rogueSunderDebuff: state.report.rogueSunderDebuff,
+    fightsData: state.report.fightsData
 })
 
 class DashboardPage extends Component{
@@ -28,6 +34,15 @@ class DashboardPage extends Component{
             loading: false,
             manual: [],
         }
+    }
+
+    downloadExcel = () => {
+        this.setState({loading: true})
+        actions.report.getFight(this.state.report).then(()=>{
+            actions.report.getFightsData(this.state.report).then(()=>{
+                this.setState({loading: false})
+            })
+        })
     }
 
     submit = () => {
@@ -140,6 +155,7 @@ class DashboardPage extends Component{
     render() {
         const sunderBase = this.calculatedSunderAvg(this.props.bossTrashSunderCasts)
         const dataSource =  this.generateSource()
+        const excelDataSource = this.props.fightsData
         const columns = [
             {
                 title: 'ID',
@@ -298,13 +314,35 @@ class DashboardPage extends Component{
             },
         ]
         return (
-            <Card title={<div>
-                <Input
-                    style={{width: 400}}
-                    placeholder="请粘贴reportID，例如: Jzx9tgnTKvVwAX"
-                    onChange={event => this.setState({report: event.target.value})}/>
-                <Button onClick={this.submit}>提交</Button>
-            </div>}>
+            <Card title={<Row type="flex" gutter={16}>
+                <Col>
+                    <Input
+                        style={{width: 400}}
+                        placeholder="请粘贴reportID，例如: Jzx9tgnTKvVwAX"
+                        onChange={event => this.setState({report: event.target.value})}/>
+                </Col>
+                <Col>
+                    <Button onClick={this.submit}>提交</Button>
+                </Col>
+                <Col>
+                    <Button onClick={this.downloadExcel}>生成下载链接</Button>
+                </Col>
+                {excelDataSource &&  <Col><ExcelFile element={<Button>下载</Button>}>
+                    <ExcelSheet data={excelDataSource} name="原始数据">
+                        <ExcelColumn label="mark" value="mark"/>
+                        <ExcelColumn label="BattleID" value="BattleID"/>
+                        <ExcelColumn label="BattleName" value="BattleName"/>
+                        <ExcelColumn label="StartTime" value="StartTime"/>
+                        <ExcelColumn label="EndTime" value="EndTime"/>
+                        <ExcelColumn label="class" value="class"/>
+                        <ExcelColumn label="name" value="name"/>
+                        <ExcelColumn label="damage-done" value="damage-done"/>
+                        <ExcelColumn label="damage-taken" value="0"/>
+                        <ExcelColumn label="healing" value="healing"/>
+                    </ExcelSheet>
+                </ExcelFile>
+                </Col>}
+            </Row>}>
                 <Table
                     rowClassName={record=>record.type}
                     size="small"
@@ -314,6 +352,7 @@ class DashboardPage extends Component{
                     rowKey='id'
                     pagination={false}
                 />
+
             </Card>
         )
     }

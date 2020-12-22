@@ -10,9 +10,11 @@
     "lodash": "^4.17.19",
     "mirrorx": "^1.1.1",
     "react": "^16.13.1",
+    "react-data-export": "^0.6.0",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "redux-logger": "^3.0.6"
+    "redux-logger": "^3.0.6",
+    "xlsx": "^0.16.9"
   },
   "scripts": {
     "start": "react-scripts start",

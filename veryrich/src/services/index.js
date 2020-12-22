@@ -27,6 +27,11 @@ function getFight (reportID) {
     return getData(url)
 }
 
+function getFightSummary (reportID, start, end) {
+    const url = `${globalConstants.BASE_URL}report/tables/summary/${reportID}?api_key=${globalConstants.API_KEY}&start=${start}&end=${end}`
+    return getData(url)
+}
+
 function getDamageTakenByAbility (reportID, abilityId) {
     const url = `${globalConstants.BASE_URL}report/tables/damage-taken/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}`
     return getData(url)
@@ -58,6 +63,7 @@ export default {
     getBOSSTrashDmg,
     getBOSSTrashCast,
     getFight,
+    getFightSummary,
     getDamageTakenByAbility,
     getDebuffsByAbility,
     getDamageDoneByAbilityAndTarget,

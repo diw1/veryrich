@@ -21,6 +21,7 @@ export default {
         runes: null,
         swiftBoot: null,
         stopWatch: null,
+        fightsData: null
     },
     reducers: {
         save(state, data) {
@@ -60,7 +61,6 @@ export default {
         async getRogueSunderDebuff(reportId){
             const result = await service.getDebuffsByAbility(reportId, globalConstants.SUNDERDEBUFFID, true)
             const validIds= [...globalConstants.TRASHIDS, ...globalConstants.BOSSIDS].filter(x=>!globalConstants.REMOVEBOSSIDS.includes(x))
-            console.log(result.data?.auras?.filter(aura=>validIds.includes(aura.guid)))
             actions.report.save({
                 rogueSunderDebuff: result.data?.auras?.filter(aura=>validIds.includes(aura.guid)).reduce((sum,i)=>sum+Number(i.totalUses),0)
             })
@@ -220,11 +220,38 @@ export default {
 
         async getFight(reportId){
             const result = await service.getFight(reportId)
-            // const enemyData = result.data.enemies.filter(enemy=>!globalConstants.EXCLUDEIDS.includes(enemy.guid) && !globalConstants.BOSSIDS.includes(enemy.guid)).map(enemy=>enemy.guid)
-            // console.log(enemyData,'emenydata')
             actions.report.save({
                 fight: result.data
             })
+        },
+
+        async getFightsData(reportId){
+            let fights = actions.report.getS().report.fight.fights
+            const fightsPromises = fights.map(async fight=> {
+                const fightsSummary = await service.getFightSummary(reportId, fight.start_time, fight.end_time)
+                let record = {
+                    BattleID: fight.id,
+                    BattleName: fight.name,
+                    StartTime: fight.start_time,
+                    EndTime: fight.end_time,
+                }
+                return fightsSummary.data?.composition?.filter(player=>(player.type === 'Warrior' || player.type === 'Rogue')).map(player=>{
+                    return ({
+                        ...record,
+                        name: player.name,
+                        class: player.type,
+                        mark: record.BattleID+player.name,
+                        ['damage-done']: fightsSummary.data?.damageDone?.find(record=>record.id===player.id)?.total || 0,
+                        healing: fightsSummary.data?.healingDone?.find(record=>record.id===player.id)?.total || 0,
+                    })})
+            })
+            Promise.all(fightsPromises).then(trashRecords=> {
+                const fightsData = trashRecords.reduce((sum, trashRecord) => sum.concat(trashRecord), [])
+                actions.report.save({
+                    fightsData: fightsData
+                })}
+            )
+
         },
 
         async getManaPotion(reportId){
