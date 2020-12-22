@@ -1,29 +1,16 @@
 import React, {Component} from 'react'
-import {Button, Input, Table, Card, Tooltip, Col, Row} from 'antd'
+import _ from 'lodash'
+import {Button, Input, Table, Card, Tooltip, Col, Row, Switch} from 'antd'
 import {QuestionCircleOutlined} from '@ant-design/icons'
 import {actions, connect} from 'mirrorx'
 import {globalConstants} from './globalConstants'
 import './index.css'
 import ReactExport from 'react-data-export'
+import TacticalTable from './Tactical'
 
 const ExcelFile = ReactExport.ExcelFile
 const ExcelSheet = ReactExport.ExcelFile.ExcelSheet
 const ExcelColumn = ReactExport.ExcelFile.ExcelColumn
-
-const mapStateToProps = state => ({
-    bossDmg: state.report.bossDmg,
-    filteredBossDmg: state.report.filteredBossDmg,
-    fight: state.report.fight,
-    bossTrashDmg: state.report.bossTrashDmg,
-    bossTrashSunderCasts: state.report.bossTrashSunderCasts,
-    webWrapDebuff: state.report.webWrapDebuff,
-    chainDebuff: state.report.chainDebuff,
-    manaPotion: state.report.manaPotion,
-    runes: state.report.runes,
-    hunterAura: state.report.hunterAura,
-    rogueSunderDebuff: state.report.rogueSunderDebuff,
-    fightsData: state.report.fightsData
-})
 
 class DashboardPage extends Component{
 
@@ -33,6 +20,7 @@ class DashboardPage extends Component{
             report: null,
             loading: false,
             manual: [],
+            tactical: false
         }
     }
 
@@ -46,30 +34,38 @@ class DashboardPage extends Component{
     }
 
     submit = () => {
+        const {tactical, report} = this.state
         let promises = []
         this.setState({loading: true})
-
         promises.push(actions.report.getBOSSDmg(this.state.report))
         promises.push(actions.report.getFight(this.state.report))
         Promise.all(promises).then(()=>{
             promises = []
-            const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
-            const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
-            const removedBossIds = this.findTargetIds(globalConstants.REMOVEBOSSIDS, this.props.fight)
-            promises.push(actions.report.getBossTrashDmg({trashIds, reportId: this.state.report, removedBossIds}))
-            promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: this.state.report}))
-            promises.push(actions.report.getManaPotion(this.state.report))
-            promises.push(actions.report.getRogueSunderDebuff(this.state.report))
-            promises.push(actions.report.getChainDebuff(this.state.report))
-            promises.push(actions.report.getWebWrapDebuff(this.state.report))
-            promises.push(actions.report.getRunes(this.state.report))
-            promises.push(actions.report.getHunterbuff(this.state.report))
-            promises.push(actions.report.getBossTrashSunderCasts({
-                trashIds: trashIds.concat(filteredBossIds),
-                reportId: this.state.report}))
+            if (tactical){
+                const slimeID = this.findTargetIds([globalConstants.SLIME], this.props.fight)
+                promises.push(actions.report.getSlime({reportId: report, slimeID}))
+                promises.push(actions.report.getThaddius(report))
+                promises.push(actions.report.get4DK(report))
+            }else {
+                const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
+                const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
+                const removedBossIds = this.findTargetIds(globalConstants.REMOVEBOSSIDS, this.props.fight)
+                promises.push(actions.report.getBossTrashDmg({trashIds, reportId: report, removedBossIds}))
+                promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: report}))
+                promises.push(actions.report.getManaPotion(report))
+                promises.push(actions.report.getRogueSunderDebuff(report))
+                promises.push(actions.report.getChainDebuff(report))
+                promises.push(actions.report.getWebWrapDebuff(report))
+                promises.push(actions.report.getRunes(report))
+                promises.push(actions.report.getHunterbuff(report))
+                promises.push(actions.report.getBossTrashSunderCasts({
+                    trashIds: trashIds.concat(filteredBossIds),
+                    reportId: this.state.report}))
+            }
             Promise.all(promises).then(()=>{
                 this.setState({loading: false})
             })
+
         })
     }
 
@@ -152,10 +148,19 @@ class DashboardPage extends Component{
         })
     }
 
+    mergeTactics = () => {
+        const {slimeTactics, thaddiusTactics, fourTactics} = this.props
+        const tacticsArray = [slimeTactics, thaddiusTactics, fourTactics]
+        return _.zipWith(...tacticsArray, (a,b,c)=>({...a,...b,...c}))
+    }
+
     render() {
-        const sunderBase = this.calculatedSunderAvg(this.props.bossTrashSunderCasts)
+        const {fightsData, bossTrashSunderCasts} = this.props
+        const tactics = this.mergeTactics()
+        const {tactical, loading} = this.state
+        const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         const dataSource =  this.generateSource()
-        const excelDataSource = this.props.fightsData
+        const excelDataSource = fightsData
         const columns = [
             {
                 title: 'ID',
@@ -316,6 +321,14 @@ class DashboardPage extends Component{
         return (
             <Card title={<Row type="flex" gutter={16}>
                 <Col>
+                    <Switch
+                        checked={tactical}
+                        onChange={(checked)=>this.setState({tactical: checked})}
+                        checkedChildren="战术动作"
+                        unCheckedChildren="伤害统计"
+                    />
+                </Col>
+                <Col>
                     <Input
                         style={{width: 400}}
                         placeholder="请粘贴reportID，例如: Jzx9tgnTKvVwAX"
@@ -324,9 +337,7 @@ class DashboardPage extends Component{
                 <Col>
                     <Button onClick={this.submit}>提交</Button>
                 </Col>
-                <Col>
-                    <Button onClick={this.downloadExcel}>生成下载链接</Button>
-                </Col>
+                {!tactical && <Col><Button onClick={this.downloadExcel}>生成下载链接</Button></Col>}
                 {excelDataSource &&  <Col><ExcelFile element={<Button>下载</Button>}>
                     <ExcelSheet data={excelDataSource} name="原始数据">
                         <ExcelColumn label="mark" value="mark"/>
@@ -337,25 +348,29 @@ class DashboardPage extends Component{
                         <ExcelColumn label="class" value="class"/>
                         <ExcelColumn label="name" value="name"/>
                         <ExcelColumn label="damage-done" value="damage-done"/>
-                        <ExcelColumn label="damage-taken" value="0"/>
                         <ExcelColumn label="healing" value="healing"/>
                     </ExcelSheet>
                 </ExcelFile>
                 </Col>}
             </Row>}>
-                <Table
-                    rowClassName={record=>record.type}
-                    size="small"
-                    loading={this.state.loading}
-                    dataSource={dataSource}
-                    columns={columns}
-                    rowKey='id'
-                    pagination={false}
-                />
-
+                {tactical ?
+                    <TacticalTable
+                        loading={loading}
+                        tactics={tactics}
+                    /> :
+                    <Table
+                        rowClassName={record => record.type}
+                        size="small"
+                        loading={loading}
+                        dataSource={dataSource}
+                        columns={columns}
+                        rowKey='id'
+                        pagination={false}
+                    />
+                }
             </Card>
         )
     }
 }
 
-export default connect(mapStateToProps, null) (DashboardPage)
+export default connect(state=>state.report) (DashboardPage)

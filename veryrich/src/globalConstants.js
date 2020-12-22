@@ -24,4 +24,19 @@ export const globalConstants = {
     STOPWATCH_ID: 14530,
     DARK_RUNEID: 27869,
     DEMON_RUNEID: 16666,
+    DENSE_BOMB: 23063, //致密炸弹
+    HAT: 11828, //电磁帽
+    SLIME: 16024, //胖子区软泥
+    DEATHWISH: 12328, //死愿ID
+    RECKLESSNESS: 1719, //鲁莽ID
+    BLADEFLURRY: 13877, //乱舞ID
+    RUSH: 13750, //冲动ID
+    THADDIUS_ENCOUNTER_ID: 1120, //电男encounterID
+    LOATHEB_ENCOUNTER_ID: 1115, //孢子encounterID
+    NOTH_ENCOUNTER_ID: 1117, //诺斯encounterID
+    RESTO: 11359, //滋补药水
+    DARKRES: 17548, //强效暗抗药水
+    HEIGAN_ENCOUNTER_ID: 1112, //希尔盖
+    SWIFT_BOOT_ITEM_ID: 7391, //迅捷鞋物品ID
+    FOUR_ENCOUNTER_ID: 1121, //4DKencounterID
 }

@@ -21,7 +21,11 @@ export default {
         runes: null,
         swiftBoot: null,
         stopWatch: null,
-        fightsData: null
+        fightsData: null,
+        tactics: null,
+        thaddiusTactics: null,
+        slimeTactics: null,
+        fourTactics: null
     },
     reducers: {
         save(state, data) {
@@ -188,33 +192,12 @@ export default {
             })
         },
 
-        async getViscidusFrosts({reportId, viscidusId}){
-            let result = actions.report.getS().report.bossDmg
-            let promises = []
-            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.OILFROSTID, viscidusId))
-            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.WEAPONFROSTID, viscidusId))
-            Promise.all(promises).then(trashRecords=>{
-                trashRecords.map(trashRecord=>{
-                    result = result.map(entry=>{
-                        let res = _.cloneDeep(entry)
-                        res.meleeFrost = res.meleeFrost || 0
-                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.hitCount
-                        res.meleeFrost =  Number.isInteger(newCast) ? res.meleeFrost + newCast : res.meleeFrost
-                        return res
-                    })
-                    actions.report.save({
-                        viscidusMeleeFrost: result
-                    })
-
-                })
-            })
-        },
-
         async getBOSSDmg(reportId){
             const result = await service.getBOSSDMG(reportId)
             actions.report.save({
                 bossDmg: result.data.entries,
-                filteredBossDmg: result.data.entries
+                filteredBossDmg: result.data.entries,
+                tactics: result.data.entries
             })
         },
 
@@ -301,6 +284,174 @@ export default {
             const result = await service.getBuffsByAbility(reportId, globalConstants.HUNTERAURA)
             actions.report.save({
                 hunterAura: result.data.auras
+            })
+        },
+
+        async getSlime({reportId, slimeID}){
+            let result = actions.report.getS().report.tactics
+            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.DENSE_BOMB, slimeID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.dense1 =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    slimeTactics: result
+                })
+            })
+            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.HAT, slimeID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.hat =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    slimeTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.RESTO, globalConstants.NOTH_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.resto =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    slimeTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, 0, globalConstants.HEIGAN_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id).gear.find(i=>i.id===globalConstants.SWIFT_BOOT_ITEM_ID)? 1 :0
+                    res.swiftBoot =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    slimeTactics: result
+                })
+            })
+        },
+
+        async getThaddius(reportId){
+            let result = actions.report.getS().report.tactics
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.THADDIUS_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish1 = res.deathwish1 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish1 =  Number.isInteger(newCast) ? res.deathwish1 + newCast : res.deathwish1
+                    return res
+                })
+                actions.report.save({
+                    thaddiusTactics: result
+                })
+            })
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.RUSH, globalConstants.THADDIUS_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish1 = res.deathwish1 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish1 =  Number.isInteger(newCast) ? res.deathwish1 + newCast : res.deathwish1
+                    return res
+                })
+                actions.report.save({
+                    thaddiusTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.LOATHEB_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish2 = res.deathwish2 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish2 =  Number.isInteger(newCast) ? res.deathwish2 + newCast : res.deathwish2
+                    return res
+                })
+                actions.report.save({
+                    thaddiusTactics: result
+                })
+            })
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.RUSH, globalConstants.LOATHEB_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish2 = res.deathwish2 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish2 =  Number.isInteger(newCast) ? res.deathwish2 + newCast : res.deathwish2
+                    return res
+                })
+                actions.report.save({
+                    thaddiusTactics: result
+                })
+            })
+        },
+
+        async get4DK(reportId){
+            let result = actions.report.getS().report.tactics
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish3 = res.deathwish3 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish3 =  Number.isInteger(newCast) ? res.deathwish3 + newCast : res.deathwish3
+                    return res
+                })
+                actions.report.save({
+                    fourTactics: result
+                })
+            })
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.RUSH, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish3 = res.deathwish3 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish3 =  Number.isInteger(newCast) ? res.deathwish3 + newCast : res.deathwish3
+                    return res
+                })
+                actions.report.save({
+                    fourTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.RECKLESSNESS, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.recklessness = res.recklessness || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.recklessness =  Number.isInteger(newCast) ? res.recklessness + newCast : res.recklessness
+                    return res
+                })
+                actions.report.save({
+                    fourTactics: result
+                })
+            })
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.BLADEFLURRY, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.recklessness = res.recklessness || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.recklessness =  Number.isInteger(newCast) ? res.recklessness + newCast : res.recklessness
+                    return res
+                })
+                actions.report.save({
+                    fourTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DARKRES, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.darkres =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    fourTactics: result
+                })
             })
         },
     }
