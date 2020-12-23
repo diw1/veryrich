@@ -31,12 +31,21 @@ export const globalConstants = {
     RECKLESSNESS: 1719, //鲁莽ID
     BLADEFLURRY: 13877, //乱舞ID
     RUSH: 13750, //冲动ID
+    PUMMEL: 6554, //拳击ID
+    KICK: 1769, //脚踢ID
+    INTERRUPT1: 15987, //侍僧ID
     THADDIUS_ENCOUNTER_ID: 1120, //电男encounterID
     LOATHEB_ENCOUNTER_ID: 1115, //孢子encounterID
     NOTH_ENCOUNTER_ID: 1117, //诺斯encounterID
     RESTO: 11359, //滋补药水
     DARKRES: 17548, //强效暗抗药水
+    NATUREDMG1: 30043, //小蜘蛛自然伤害1
+    NATUREDMG2: 28428, //小蜘蛛自然伤害2
     HEIGAN_ENCOUNTER_ID: 1112, //希尔盖
     SWIFT_BOOT_ITEM_ID: 7391, //迅捷鞋物品ID
+    ROCKET_BOOT_ITEM_ID: 7189, //火箭鞋物品ID
     FOUR_ENCOUNTER_ID: 1121, //4DKencounterID
+    MAEXXNA_ENCOUNTER_ID: 1116, //蜘蛛3 ID
+    ANUB_ENCOUNTER_ID: 1107, //蜘蛛1 ID
+    KEL_ENCOUNTER_ID: 1114, //老克ID
 }

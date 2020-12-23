@@ -43,9 +43,11 @@ class DashboardPage extends Component{
             promises = []
             if (tactical){
                 const slimeID = this.findTargetIds([globalConstants.SLIME], this.props.fight)
+                const interruptID = this.findTargetIds([globalConstants.INTERRUPT1], this.props.fight)
                 promises.push(actions.report.getSlime({reportId: report, slimeID}))
                 promises.push(actions.report.getThaddius(report))
                 promises.push(actions.report.get4DK(report))
+                promises.push(actions.report.getSpider({reportId: report, interruptID}))
             }else {
                 const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
                 const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
@@ -149,9 +151,9 @@ class DashboardPage extends Component{
     }
 
     mergeTactics = () => {
-        const {slimeTactics, thaddiusTactics, fourTactics} = this.props
-        const tacticsArray = [slimeTactics, thaddiusTactics, fourTactics]
-        return _.zipWith(...tacticsArray, (a,b,c)=>({...a,...b,...c}))
+        const {slimeTactics, thaddiusTactics, fourTactics, spiderTactics} = this.props
+        const tacticsArray = [slimeTactics, thaddiusTactics, fourTactics, spiderTactics]
+        return tacticsArray.reduce((sum,item)=>_.zipWith(sum, item, (a,b,)=>({...a,...b})))
     }
 
     render() {

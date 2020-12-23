@@ -25,7 +25,8 @@ export default {
         tactics: null,
         thaddiusTactics: null,
         slimeTactics: null,
-        fourTactics: null
+        fourTactics: null,
+        spiderTactics: null,
     },
     reducers: {
         save(state, data) {
@@ -289,6 +290,7 @@ export default {
 
         async getSlime({reportId, slimeID}){
             let result = actions.report.getS().report.tactics
+            //小软的致密伤害
             service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.DENSE_BOMB, slimeID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -300,6 +302,7 @@ export default {
                     slimeTactics: result
                 })
             })
+            //小软的帽子伤害
             service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.HAT, slimeID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -451,6 +454,87 @@ export default {
                 })
                 actions.report.save({
                     fourTactics: result
+                })
+            })
+        },
+
+        async getSpider({reportId, interruptID}){
+            let result = actions.report.getS().report.tactics
+            //蜘蛛群自然抗吸收
+            service.getDamageTakenByAbility(reportId, globalConstants.NATUREDMG1).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.natureres = res.natureres || false
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails?.find(hitdetail=>hitdetail.type==='Absorb')
+                    res.natureres =  absorb || res.natureres
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            service.getDamageTakenByAbility(reportId, globalConstants.NATUREDMG2).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.natureres = res.natureres || false
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails?.find(hitdetail=>hitdetail.type==='Absorb')
+                    res.natureres =  absorb || res.natureres
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.PUMMEL, interruptID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.interrupt1 = res.interrupt1 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
+                    res.interrupt1 =  Number.isInteger(newCast) ? res.interrupt1 + newCast : res.interrupt1
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.KICK, interruptID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.interrupt1 = res.interrupt1 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
+                    res.interrupt1 =  Number.isInteger(newCast) ? res.interrupt1 + newCast : res.interrupt1
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            // 火箭鞋打蜘蛛1
+            service.getCastsByAbilityAndEncounter(reportId, 0, globalConstants.ANUB_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id).gear.find(i=>i.id===globalConstants.ROCKET_BOOT_ITEM_ID)? 1 :0
+                    res.rocketBoot =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+            //蜘蛛3补暗抗
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DARKRES, globalConstants.MAEXXNA_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.darkres2 =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
                 })
             })
         },

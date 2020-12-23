@@ -110,6 +110,41 @@ class TacticalTable extends Component{
                     },
                 ]
             },
+            {
+                title: '蜘蛛区',
+                children: [
+                    {
+                        title: '自然抗',
+                        dataIndex: 'natureres',
+                        render: (text, item)=> item.natureres ? '有':'可能没有'
+                    },
+                    {
+                        title: '蜘蛛1火箭鞋',
+                        dataIndex: 'rocketBoot',
+                    },
+                    {
+                        title: '侍僧打断',
+                        dataIndex: 'interrupt1',
+                    },
+                    {
+                        title: '蜘蛛3暗抗',
+                        dataIndex: 'darkres2',
+                    },
+                ]
+            },
+            // {
+            //     title: '中心区',
+            //     children: [
+            //         {
+            //             title: '老克冰抗',
+            //             dataIndex: 'darkres',
+            //         },
+            //         {
+            //             title: '老克打断',
+            //             dataIndex: 'deathwish3',
+            //         },
+            //     ]
+            // },
 
 
             // {
