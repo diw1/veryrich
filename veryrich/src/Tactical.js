@@ -132,19 +132,19 @@ class TacticalTable extends Component{
                     },
                 ]
             },
-            // {
-            //     title: '中心区',
-            //     children: [
-            //         {
-            //             title: '老克冰抗',
-            //             dataIndex: 'darkres',
-            //         },
-            //         {
-            //             title: '老克打断',
-            //             dataIndex: 'deathwish3',
-            //         },
-            //     ]
-            // },
+            {
+                title: '中心区',
+                children: [
+                    {
+                        title: '老克冰抗',
+                        dataIndex: 'iceres',
+                    },
+                    {
+                        title: '老克打断',
+                        dataIndex: 'interrupt2',
+                    },
+                ]
+            },
 
 
             // {

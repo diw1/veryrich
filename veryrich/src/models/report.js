@@ -486,8 +486,21 @@ export default {
                     spiderTactics: result
                 })
             })
-
+            // 侍僧打断
             service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.PUMMEL, interruptID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.interrupt1 = res.interrupt1 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
+                    res.interrupt1 =  Number.isInteger(newCast) ? res.interrupt1 + newCast : res.interrupt1
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.SHIELDBASH, interruptID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
                     res.interrupt1 = res.interrupt1 || 0
@@ -531,6 +544,58 @@ export default {
                     let res = _.cloneDeep(entry)
                     const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
                     res.darkres2 =  Number.isInteger(newCast) ? newCast : 0
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+            // 老克打断
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.PUMMEL, globalConstants.KEL_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.interrupt2 = res.interrupt2 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
+                    res.interrupt2 =  Number.isInteger(newCast) ? res.interrupt2 + newCast : res.interrupt2
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.SHIELDBASH, globalConstants.KEL_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.interrupt2 = res.interrupt2 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
+                    res.interrupt2 =  Number.isInteger(newCast) ? res.interrupt2 + newCast : res.interrupt2
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.KICK, globalConstants.KEL_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.interrupt2 = res.interrupt2 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
+                    res.interrupt2 =  Number.isInteger(newCast) ? res.interrupt2 + newCast : res.interrupt2
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
+            //老克冰抗
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.ICERES, globalConstants.KEL_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.iceres =  Number.isInteger(newCast) ? newCast : 0
                     return res
                 })
                 actions.report.save({

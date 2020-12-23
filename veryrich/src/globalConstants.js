@@ -32,6 +32,7 @@ export const globalConstants = {
     BLADEFLURRY: 13877, //乱舞ID
     RUSH: 13750, //冲动ID
     PUMMEL: 6554, //拳击ID
+    SHIELDBASH: 1672, //盾击ID
     KICK: 1769, //脚踢ID
     INTERRUPT1: 15987, //侍僧ID
     THADDIUS_ENCOUNTER_ID: 1120, //电男encounterID
@@ -39,6 +40,7 @@ export const globalConstants = {
     NOTH_ENCOUNTER_ID: 1117, //诺斯encounterID
     RESTO: 11359, //滋补药水
     DARKRES: 17548, //强效暗抗药水
+    ICERES: 17544, //强效暗抗药水
     NATUREDMG1: 30043, //小蜘蛛自然伤害1
     NATUREDMG2: 28428, //小蜘蛛自然伤害2
     HEIGAN_ENCOUNTER_ID: 1112, //希尔盖
