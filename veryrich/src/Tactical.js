@@ -125,17 +125,17 @@ class TacticalTable extends Component{
                     {
                         title: '侍僧打断',
                         dataIndex: 'interrupt1',
-                    },
-                    {
-                        title: '蜘蛛3暗抗',
-                        dataIndex: 'darkres2',
-                        render: (text, item)=> item.darkres2 ? '有':'无'
-                    },
+                    }
                 ]
             },
             {
                 title: '中心区',
                 children: [
+                    {
+                        title: '冰龙暗抗吸收',
+                        dataIndex: 'darkres2',
+                        render: (text, item)=> !item.darkres2 && '没有'
+                    },
                     {
                         title: '老克冰抗',
                         dataIndex: 'iceres',

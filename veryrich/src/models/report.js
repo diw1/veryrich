@@ -538,29 +538,16 @@ export default {
                     spiderTactics: result
                 })
             })
-            //蜘蛛3补暗抗
-            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DARKRES, globalConstants.MAEXXNA_ENCOUNTER_ID).then(record=>{
-                result = result.map(entry=>{
-                    let res = _.cloneDeep(entry)
-                    res.darkres2 = res.darkres2 || false
-                    const newCast = record.data.entries.find(i=>i.id===entry.id)
-                    res.darkres2 =  newCast || res.darkres2
-                    return res
-                })
-                actions.report.save({
-                    spiderTactics: result
-                })
-            })
+            //冰龙的暗抗
 
             service.getDamageTakenByAbility(reportId, globalConstants.LIFE_STEAL_ID).then(record=>{
-                console.log(record)
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    res.darkres2 = res.darkres2 || false
-                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails?.find(hitdetail=>
-                        hitdetail.type==='Absorb' || hitdetail.type==='Tick Absorb'
-                    )
-                    res.darkres2 =  absorb || res.darkres2
+                    res.darkres2 =  true
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails.length>0 ?
+                        record.data.entries.find(i=>i.id===entry.id).hitdetails.find(hitdetail=> hitdetail.type==='Absorb'
+                            || hitdetail.type==='Tick Absorb' || hitdetail.type==='Resist' || hitdetail.type==='Tick' && hitdetail.absorbOrOverheal>0) : true
+                    res.darkres2 =  absorb
                     return res
                 })
                 actions.report.save({
