@@ -542,14 +542,32 @@ export default {
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.DARKRES, globalConstants.MAEXXNA_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
-                    res.darkres2 =  Number.isInteger(newCast) ? newCast : 0
+                    res.darkres2 = res.darkres2 || false
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)
+                    res.darkres2 =  newCast || res.darkres2
                     return res
                 })
                 actions.report.save({
                     spiderTactics: result
                 })
             })
+
+            service.getDamageTakenByAbility(reportId, globalConstants.LIFE_STEAL_ID).then(record=>{
+                console.log(record)
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.darkres2 = res.darkres2 || false
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails?.find(hitdetail=>
+                        hitdetail.type==='Absorb' || hitdetail.type==='Tick Absorb'
+                    )
+                    res.darkres2 =  absorb || res.darkres2
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+
             // 老克打断
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.PUMMEL, globalConstants.KEL_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{

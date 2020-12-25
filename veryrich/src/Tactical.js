@@ -129,6 +129,7 @@ class TacticalTable extends Component{
                     {
                         title: '蜘蛛3暗抗',
                         dataIndex: 'darkres2',
+                        render: (text, item)=> item.darkres2 ? '有':'无'
                     },
                 ]
             },

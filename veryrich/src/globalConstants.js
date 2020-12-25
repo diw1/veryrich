@@ -48,6 +48,7 @@ export const globalConstants = {
     ROCKET_BOOT_ITEM_ID: 7189, //火箭鞋物品ID
     FOUR_ENCOUNTER_ID: 1121, //4DKencounterID
     MAEXXNA_ENCOUNTER_ID: 1116, //蜘蛛3 ID
+    LIFE_STEAL_ID: 28542, //冰龙生命吸取ID
     ANUB_ENCOUNTER_ID: 1107, //蜘蛛1 ID
     KEL_ENCOUNTER_ID: 1114, //老克ID
 }
