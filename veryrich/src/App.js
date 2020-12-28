@@ -53,6 +53,8 @@ class DashboardPage extends Component{
                 const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
                 const removedBossIds = this.findTargetIds(globalConstants.REMOVEBOSSIDS, this.props.fight)
                 const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
+                const thaID = this.findTargetIds([globalConstants.THADDIUS_ID], this.props.fight)
+                promises.push(actions.report.getThaParry({reportId: report, thaID}))
                 promises.push(actions.report.getKelParry({reportId: report, kelID}))
                 promises.push(actions.report.getBossTrashDmg({trashIds, reportId: report, removedBossIds}))
                 promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: report}))
@@ -98,7 +100,7 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff, rogueSunderDebuff, kelParry} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff, rogueSunderDebuff, kelParry, thaParry, thaDmg} = this.props
         let finalDmgMax = {}
         const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         let source = bossDmg?.map(entry=>{
@@ -113,6 +115,8 @@ class DashboardPage extends Component{
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const chainTime = Math.round(chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const kelParryDmg = kelParry?.find(trashEntry=>trashEntry.id===entry.id)?.kelParryDmg
+            const thaParryDmg = thaParry?.find(trashEntry=>trashEntry.id===entry.id)?.thaParryDmg
+            const thaBasicDmg = thaDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
             const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0
@@ -134,7 +138,9 @@ class DashboardPage extends Component{
                 chainTime,
                 webWrapTime,
                 manual,
-                kelParryDmg
+                kelParryDmg,
+                thaParryDmg,
+                thaBasicDmg
             }
         })
 
@@ -215,6 +221,27 @@ class DashboardPage extends Component{
 
                 ],
                 onFilter: (value, record) => record.type === value ,
+            },
+            {
+                title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
+                    <span>电男伤害<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                dataIndex: 'thaBasicDmg',
+                render: text=> text !== 0 ? text : null,
+                sorter: (a, b) => a.thaBasicDmg-b.thaBasicDmg,
+            },
+            {
+                title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
+                    <span>电男招架补偿<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                dataIndex: 'thaParryDmg',
+                render: text=> text !== 0 ? text : null,
+            },
+            {
+                title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
+                    <span>电男总伤害<QuestionCircleOutlined /></span>
+                </Tooltip>,
+                render: (text, record)=> record.thaBasicDmg + record.thaParryDmg
             },
             {
                 title: 'Boss伤害',

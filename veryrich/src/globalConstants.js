@@ -36,6 +36,7 @@ export const globalConstants = {
     KICK: 1769, //脚踢ID
     INTERRUPT1: 15987, //侍僧ID
     THADDIUS_ENCOUNTER_ID: 1120, //电男encounterID
+    THADDIUS_ID: 15928, //电男ID
     LOATHEB_ENCOUNTER_ID: 1115, //孢子encounterID
     NOTH_ENCOUNTER_ID: 1117, //诺斯encounterID
     RESTO: 11359, //滋补药水

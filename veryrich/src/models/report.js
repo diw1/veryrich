@@ -28,6 +28,8 @@ export default {
         fourTactics: null,
         spiderTactics: null,
         kelParry: null,
+        thaParry: null,
+        thaDmg: null
     },
     reducers: {
         save(state, data) {
@@ -626,7 +628,6 @@ export default {
                         const avgDmg = player?.hitCount ? player?.total/player?.hitCount : 0
                         const parryCount = avgDmg && player?.missdetails.find(detail=>detail.type==='Parry')?.count
                         const cpDmg = parryCount && Math.floor(avgDmg * parryCount * (player.type==='Warrior' && isMelee ? 2: 1))
-                        console.log(avgDmg, parryCount, cpDmg, )
                         res.kelParryDmg = Number.isInteger(cpDmg) ? res.kelParryDmg + cpDmg : res.kelParryDmg
                         return res
                     })
@@ -634,6 +635,37 @@ export default {
                         kelParry: result
                     })
                 })
+            })
+        },
+
+        async getThaParry({reportId, thaID}) {
+            const {BS1_ID, BS4_ID, MELEE_ID, WW_ID, EX_ID, HS_ID} = globalConstants
+            let abilities = [BS1_ID, BS4_ID, MELEE_ID, WW_ID, EX_ID, HS_ID]
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            abilities.map((abilityID)=> promises.push(service.getDamageDoneByAbilityAndTarget(reportId, abilityID, thaID)))
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    const isMelee = trashRecord.data.entries.find(i=>i.type==='Warrior') && trashRecord.data.entries.find(i=>i.type==='Rogue')
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.thaParryDmg = res.thaParryDmg || 0
+                        const player = trashRecord.data.entries.find(i=>i.id===entry.id)
+                        const avgDmg = player?.hitCount ? player?.total/player?.hitCount : 0
+                        const parryCount = avgDmg && player?.missdetails.find(detail=>detail.type==='Parry')?.count
+                        const cpDmg = parryCount && Math.floor(avgDmg * parryCount * (player.type==='Warrior' && isMelee ? 2: 1))
+                        res.thaParryDmg = Number.isInteger(cpDmg) ? res.thaParryDmg + cpDmg : res.thaParryDmg
+                        return res
+                    })
+                    actions.report.save({
+                        thaParry: result
+                    })
+                })
+            })
+
+            const thaDmg = await service.getDamageDoneByAbilityAndTarget(reportId, 0, thaID)
+            actions.report.save({
+                thaDmg: thaDmg.data.entries,
             })
         }
     }
