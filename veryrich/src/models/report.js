@@ -27,6 +27,7 @@ export default {
         slimeTactics: null,
         fourTactics: null,
         spiderTactics: null,
+        kelParry: null,
     },
     reducers: {
         save(state, data) {
@@ -608,5 +609,33 @@ export default {
                 })
             })
         },
+
+        async getKelParry({reportId, kelID}) {
+            const {BS1_ID, BS4_ID, MELEE_ID, WW_ID, EX_ID, HS_ID} = globalConstants
+            let abilities = [BS1_ID, BS4_ID, MELEE_ID, WW_ID, EX_ID, HS_ID]
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            abilities.map((abilityID)=> promises.push(service.getDamageDoneByAbilityAndTarget(reportId, abilityID, kelID)))
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    const isMelee = trashRecord.data.entries.find(i=>i.type==='Warrior') && trashRecord.data.entries.find(i=>i.type==='Rogue')
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.kelParryDmg = res.kelParryDmg || 0
+                        const player = trashRecord.data.entries.find(i=>i.id===entry.id)
+                        const avgDmg = player?.hitCount ? player?.total/player?.hitCount : 0
+                        const parryCount = avgDmg && player?.missdetails.find(detail=>detail.type==='Parry')?.count
+                        const cpDmg = parryCount && Math.floor(avgDmg * parryCount * (player.type==='Warrior' && isMelee ? 2: 1))
+                        console.log(avgDmg, parryCount, cpDmg, )
+                        res.kelParryDmg = Number.isInteger(cpDmg) ? res.kelParryDmg + cpDmg : res.kelParryDmg
+                        return res
+                    })
+                    actions.report.save({
+                        kelParry: result
+                    })
+                })
+            })
+        }
     }
+
 }

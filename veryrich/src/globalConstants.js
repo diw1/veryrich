@@ -51,4 +51,12 @@ export const globalConstants = {
     LIFE_STEAL_ID: 28542, //冰龙生命吸取ID
     ANUB_ENCOUNTER_ID: 1107, //蜘蛛1 ID
     KEL_ENCOUNTER_ID: 1114, //老克ID
+    KEL_ID: 15990,
+    MELEE_ID: 1,
+    BS1_ID:23881,
+    BS4_ID:23894,
+    HS_ID: 25286,
+    WW_ID: 1680,
+    EX_ID: 20647,
+
 }

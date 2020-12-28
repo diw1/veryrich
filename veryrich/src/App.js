@@ -52,6 +52,8 @@ class DashboardPage extends Component{
                 const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
                 const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
                 const removedBossIds = this.findTargetIds(globalConstants.REMOVEBOSSIDS, this.props.fight)
+                const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
+                promises.push(actions.report.getKelParry({reportId: report, kelID}))
                 promises.push(actions.report.getBossTrashDmg({trashIds, reportId: report, removedBossIds}))
                 promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: report}))
                 promises.push(actions.report.getManaPotion(report))
@@ -96,7 +98,7 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff, rogueSunderDebuff} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff, rogueSunderDebuff, kelParry} = this.props
         let finalDmgMax = {}
         const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         let source = bossDmg?.map(entry=>{
@@ -110,10 +112,11 @@ class DashboardPage extends Component{
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const chainTime = Math.round(chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
+            const kelParryDmg = kelParry?.find(trashEntry=>trashEntry.id===entry.id)?.kelParryDmg
             const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
             const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0
-            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + this.calculateManualSum(manual)
+            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + Number(kelParryDmg) + this.calculateManualSum(manual)
             finalDmgMax[entry.type] = finalDmgMax[entry.type] > finalDamage ? finalDmgMax[entry.type] : finalDamage
             return {
                 id: entry.id,
@@ -130,7 +133,8 @@ class DashboardPage extends Component{
                 finalDamage,
                 chainTime,
                 webWrapTime,
-                manual
+                manual,
+                kelParryDmg
             }
         })
 
@@ -250,18 +254,24 @@ class DashboardPage extends Component{
                 render: text=> text !== 0 ? text : null,
             },
             {
-                title: '老克心控',
+                title: '老克',
                 children: [
                     {
-                        title: '时间',
+                        title: '心控时间',
                         dataIndex: 'chainTime',
                     },
                     {
-                        title: '补分',
+                        title: '心控补分',
                         dataIndex: ['manual','chain'],
                         render: (text, record) => <Input value={this.state.manual.chain} onBlur={(e)=>this.handleManualChange(e, record, 'chain')} style={{maxWidth: 85}}/>
                     },
-
+                    {
+                        title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
+                            <span>招架补偿<QuestionCircleOutlined /></span>
+                        </Tooltip>,
+                        dataIndex: 'kelParryDmg',
+                        render: text=> text !== 0 ? text : null,
+                    },
                 ]
             },
             {
