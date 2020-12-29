@@ -107,7 +107,7 @@ class DashboardPage extends Component{
             const sunderCasts = entry.type === 'Warrior' ? bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder :
                 bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.rogueSunder ? rogueSunderDebuff : 0
             const sunderPenalty = entry.type==='Warrior' ? sunderCasts < sunderBase  ? Math.floor(-0.05 * trashDmg) : 0 :
-                entry.type==='Rogue' ? sunderCasts * 2000 : 0
+                entry.type==='Rogue' ? sunderCasts * 2200 : 0
             const manual = this.state.manual.find(trashEntry=>trashEntry.id===entry.id) || {}
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
@@ -240,7 +240,7 @@ class DashboardPage extends Component{
                 render: (text,record)=> record.type ==='Warrior' || record.type ==='Rogue' ? text : '',
             },
             {
-                title: <Tooltip title={`平均数的70%为: ${sunderBase}，不足的扣5%有效伤害, 贼每个成功的强破补偿2000伤害`}>
+                title: <Tooltip title={`平均数的70%为: ${sunderBase}，不足的扣5%有效伤害, 贼每个成功的强破补偿2200伤害`}>
                     <span>破甲补/扣分<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'sunderPenalty',
