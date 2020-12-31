@@ -56,26 +56,11 @@ export default {
             })
         },
 
-
-        async getChainDebuff(reportId){
-            const result = await service.getDebuffsByAbility(reportId, globalConstants.CHAINID)
-            actions.report.save({
-                chainDebuff: result.data.auras
-            })
-        },
-
         async getRogueSunderDebuff(reportId){
             const result = await service.getDebuffsByAbility(reportId, globalConstants.SUNDERDEBUFFID, true)
             const validIds= [...globalConstants.TRASHIDS, ...globalConstants.BOSSIDS].filter(x=>!globalConstants.REMOVEBOSSIDS.includes(x))
             actions.report.save({
                 rogueSunderDebuff: result.data?.auras?.filter(aura=>validIds.includes(aura.guid)).reduce((sum,i)=>sum+Number(i.totalUses),0)
-            })
-        },
-
-        async getWebWrapDebuff(reportId){
-            const result = await service.getDebuffsByAbility(reportId, globalConstants.WEBWRAPID)
-            actions.report.save({
-                webWrapDebuff: result.data.auras
             })
         },
 
@@ -162,35 +147,6 @@ export default {
                     })
 
                 })
-            })
-        },
-
-        async getViscidusBanned({reportId, viscidusId}){
-            let result = actions.report.getS().report.bossDmg
-            let promises = []
-            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.BLOODTHIRSTID, viscidusId))
-            promises.push(service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.EXECUTEID, viscidusId))
-            Promise.all(promises).then(trashRecords=>{
-                trashRecords.map(trashRecord=>{
-                    result = result.map(entry=>{
-                        let res = _.cloneDeep(entry)
-                        res.banned = res.banned || 0
-                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.hitCount
-                        res.banned =  Number.isInteger(newCast) ? res.banned + newCast : res.banned
-                        return res
-                    })
-                    actions.report.save({
-                        viscidusBanned: result
-                    })
-
-                })
-            })
-        },
-
-        async getViscidusCasts({reportId, viscidusId}){
-            const result = await service.getBOSSTrashCast(reportId, viscidusId)
-            actions.report.save({
-                viscidusCasts: result.data.entries
             })
         },
 
@@ -610,6 +566,38 @@ export default {
             })
         },
 
+        async getChainDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.CHAINID)
+            const damage = await service.getDamageDoneByAbilityAndEncounter(reportId, 0, globalConstants.KEL_ENCOUNTER_ID)
+            const bossFight = actions.report.getS().report.fight.fights.find(fight=>fight.boss===globalConstants.KEL_ENCOUNTER_ID)
+            const bossTime = bossFight.end_time-bossFight.start_time
+            const chainDebuff = result.data.auras.map(debuff=>{
+                const playerDMG = damage.data.entries?.find(dmg=> debuff.id === dmg.id).total
+                const avg = playerDMG/(bossTime-debuff.totalUptime)
+                const debuffDmg = Math.floor(avg*debuff.totalUptime)
+                return {...debuff, debuffDmg}
+            })
+            actions.report.save({
+                chainDebuff
+            })
+        },
+
+        async getWebWrapDebuff(reportId){
+            const result = await service.getDebuffsByAbility(reportId, globalConstants.WEBWRAPID)
+            const damage = await service.getDamageDoneByAbilityAndEncounter(reportId, 0, globalConstants.MAEXXNA_ENCOUNTER_ID)
+            const bossFight = actions.report.getS().report.fight.fights.find(fight=>fight.boss===globalConstants.MAEXXNA_ENCOUNTER_ID)
+            const bossTime = bossFight.end_time-bossFight.start_time
+            const webWrapDebuff = result.data.auras.map(debuff=>{
+                const playerDMG = damage.data.entries?.find(dmg=> debuff.id === dmg.id)?.total
+                const avg = playerDMG/(bossTime-debuff.totalUptime-globalConstants.WEB_WRAP_RUN*1000)
+                const debuffDmg = Math.floor(avg*(debuff.totalUptime+globalConstants.WEB_WRAP_RUN*1000))
+                return {...debuff, debuffDmg}
+            })
+            actions.report.save({
+                webWrapDebuff
+            })
+        },
+
         async getKelParry({reportId, kelID}) {
             const {BS1_ID, BS4_ID, MELEE_ID, WW_ID, EX_ID, HS_ID} = globalConstants
             let abilities = [BS1_ID, BS4_ID, MELEE_ID, WW_ID, EX_ID, HS_ID]
@@ -626,7 +614,6 @@ export default {
                         const avgDmg = player?.hitCount ? player?.total/player?.hitCount : 0
                         const parryCount = avgDmg && player?.missdetails.find(detail=>detail.type==='Parry')?.count
                         const cpDmg = parryCount && Math.floor(avgDmg * parryCount * (player.type==='Warrior' && isMelee ? 2: 1))
-                        console.log(avgDmg, parryCount, cpDmg, )
                         res.kelParryDmg = Number.isInteger(cpDmg) ? res.kelParryDmg + cpDmg : res.kelParryDmg
                         return res
                     })

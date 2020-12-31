@@ -62,6 +62,11 @@ function getCastsByAbilityAndEncounter (reportID, abilityId, encounterID) {
     return getData(url)
 }
 
+function getDamageDoneByAbilityAndEncounter (reportID, abilityId, encounterID) {
+    const url = `${globalConstants.BASE_URL}report/tables/damage-done/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}&encounter=${encounterID}`
+    return getData(url)
+}
+
 export default {
     getDMGdone,
     getBOSSDMG,
@@ -74,5 +79,6 @@ export default {
     getDamageDoneByAbilityAndTarget,
     getCastsByAbility,
     getBuffsByAbility,
-    getCastsByAbilityAndEncounter
+    getCastsByAbilityAndEncounter,
+    getDamageDoneByAbilityAndEncounter
 }

@@ -13,6 +13,7 @@ export const globalConstants = {
     HUNTERAURA: 20906,
     CHAINID: 28410,
     WEBWRAPID:28622,
+    WEB_WRAP_RUN: 6, //second
     SUNDERDEBUFFID: 11198,
     BLOODTHIRSTID: 23894,
     SHOTID: 5019,

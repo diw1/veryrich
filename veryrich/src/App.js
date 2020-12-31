@@ -78,14 +78,6 @@ class DashboardPage extends Component{
         return enemies.map(enemy=>trashIds.includes(enemy.guid)&&enemy.id).filter(id=>!!id)
     }
 
-    calculateBossTime = (fight) => {
-        let sum = 0
-        fight&&fight.fights.filter(record=>record.boss!==0).map(record=>{
-            sum+=record.end_time-record.start_time
-        })
-        return sum/1000
-    }
-
     calculatedSunderAvg = (sunderCasts) => {
         let sumWithoutTop4 = sunderCasts?.map(i=>i.sunder).sort((a,b)=>b-a).slice(4).reduce((sum, item)=>sum+item)
         let furyWarriorCounts = sunderCasts?.filter(item=> item.type ==='Warrior')?.length
@@ -112,11 +104,13 @@ class DashboardPage extends Component{
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
             const runesCasts = runes?.find(trashEntry=>trashEntry.id===entry.id)?.runes
             const chainTime = Math.round(chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
+            const chainDmg = chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.debuffDmg || ''
             const kelParryDmg = kelParry?.find(trashEntry=>trashEntry.id===entry.id)?.kelParryDmg
-            const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
+            const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 + globalConstants.WEB_WRAP_RUN) || ''
+            const webDmg = webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.debuffDmg || ''
             const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
             const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0
-            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + Number(kelParryDmg) + this.calculateManualSum(manual)
+            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + Number(chainDmg) + Number(webDmg) + Number(kelParryDmg) + this.calculateManualSum(manual)
             finalDmgMax[entry.type] = finalDmgMax[entry.type] > finalDamage ? finalDmgMax[entry.type] : finalDamage
             return {
                 id: entry.id,
@@ -132,7 +126,9 @@ class DashboardPage extends Component{
                 hunterAuraPenalty,
                 finalDamage,
                 chainTime,
+                chainDmg,
                 webWrapTime,
+                webDmg,
                 manual,
                 kelParryDmg
             }
@@ -261,9 +257,8 @@ class DashboardPage extends Component{
                         dataIndex: 'chainTime',
                     },
                     {
-                        title: '心控补分',
-                        dataIndex: ['manual','chain'],
-                        render: (text, record) => <Input value={this.state.manual.chain} onBlur={(e)=>this.handleManualChange(e, record, 'chain')} style={{maxWidth: 85}}/>
+                        title: '心控补偿',
+                        dataIndex: 'chainDmg',
                     },
                     {
                         title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
@@ -280,13 +275,14 @@ class DashboardPage extends Component{
                 </Tooltip>,
                 children: [
                     {
-                        title: '时间',
+                        title:<Tooltip title={`时间计算方式为上墙debuff时间+${globalConstants.WEB_WRAP_RUN}秒跑路时间`}>
+                            <span>时间<QuestionCircleOutlined /></span>
+                        </Tooltip>,
                         dataIndex: 'webWrapTime',
                     },
                     {
-                        title: '补分',
-                        dataIndex: ['manual','web'],
-                        render: (text, record) => <Input value={this.state.manual.web} onBlur={(e)=>this.handleManualChange(e, record, 'web')} style={{maxWidth: 85}}/>
+                        title: '上墙补偿',
+                        dataIndex: 'webDmg',
                     },
 
                 ]
