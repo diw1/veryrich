@@ -25,10 +25,19 @@ class DashboardPage extends Component{
     }
 
     downloadExcel = () => {
+        const {report} = this.state
         this.setState({loading: true})
-        actions.report.getFight(this.state.report).then(()=>{
-            actions.report.getFightsData(this.state.report).then(()=>{
-                this.setState({loading: false})
+        let promises = []
+        promises.push(actions.report.getBOSSDmg(report))
+        promises.push(actions.report.getFight(report))
+        Promise.all(promises).then(()=>{
+            const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
+            promises = []
+            promises.push(actions.report.getKelParry({reportId: report, kelID}))
+            promises.push(actions.report.getChainDebuff(report))
+            promises.push(actions.report.getWebWrapDebuff(report))
+            Promise.all(promises).then(()=>{
+                actions.report.getFightsData(report).then(()=>{this.setState({loading: false})})
             })
         })
     }
@@ -355,7 +364,7 @@ class DashboardPage extends Component{
                         <ExcelColumn label="EndTime" value="EndTime"/>
                         <ExcelColumn label="class" value="class"/>
                         <ExcelColumn label="name" value="name"/>
-                        <ExcelColumn label="damage-done" value="damage-done"/>
+                        <ExcelColumn label="damage-done" value="damageDone"/>
                         <ExcelColumn label="healing" value="healing"/>
                     </ExcelSheet>
                 </ExcelFile>

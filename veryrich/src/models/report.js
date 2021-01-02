@@ -167,7 +167,9 @@ export default {
         },
 
         async getFightsData(reportId){
-            let fights = actions.report.getS().report.fight.fights
+            let report = actions.report.getS().report
+            let {fight, kelParry, chainDebuff, webWrapDebuff} = report
+            const {fights} = fight
             const fightsPromises = fights.map(async fight=> {
                 const fightsSummary = await service.getFightSummary(reportId, fight.start_time, fight.end_time)
                 let record = {
@@ -175,16 +177,29 @@ export default {
                     BattleName: fight.name,
                     StartTime: fight.start_time,
                     EndTime: fight.end_time,
+                    BossID: fight.boss
                 }
                 return fightsSummary.data?.composition?.filter(player=>(player.type === 'Warrior' || player.type === 'Rogue')).map(player=>{
-                    return ({
+                    let fightDetail = {
                         ...record,
                         name: player.name,
                         class: player.type,
                         mark: record.BattleID+player.name,
-                        ['damage-done']: fightsSummary.data?.damageDone?.find(record=>record.id===player.id)?.total || 0,
+                        damageDone: fightsSummary.data?.damageDone?.find(record=>record.id===player.id)?.total || 0,
                         healing: fightsSummary.data?.healingDone?.find(record=>record.id===player.id)?.total || 0,
-                    })})
+                    }
+                    if (fightDetail.BossID === globalConstants.MAEXXNA_ENCOUNTER_ID){
+                        const debuffDmg = webWrapDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
+                        fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
+                    }
+                    if (fightDetail.BossID === globalConstants.KEL_ENCOUNTER_ID){
+                        const debuffDmg = chainDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
+                        fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
+                        const parryDmg = kelParry.find(parry=>parry.id===player.id)?.kelParryDmg
+                        fightDetail.damageDone = parryDmg ? fightDetail.damageDone + parryDmg : fightDetail.damageDone
+                    }
+                    return (fightDetail)
+                })
             })
             Promise.all(fightsPromises).then(trashRecords=> {
                 const fightsData = trashRecords.reduce((sum, trashRecord) => sum.concat(trashRecord), [])
