@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "c8e843ba5d636bb38c1161e2a468f52b",
+    "revision": "15b2ff239fe9b873337a54150fec0b3e",
     "url": "/veryrich/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/veryrich/static/css/2.21ee2aab.chunk.css"
   },
   {
-    "revision": "93039a090351196e886b",
+    "revision": "7807fd96544c4e034a39",
     "url": "/veryrich/static/css/main.bf29b1df.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/veryrich/static/js/2.32843244.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "93039a090351196e886b",
-    "url": "/veryrich/static/js/main.13768b3b.chunk.js"
+    "revision": "7807fd96544c4e034a39",
+    "url": "/veryrich/static/js/main.3678b892.chunk.js"
   },
   {
     "revision": "c7ee737114c3729bbce1",
