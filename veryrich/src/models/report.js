@@ -587,7 +587,7 @@ export default {
             const bossFight = actions.report.getS().report.fight.fights.find(fight=>fight.boss===globalConstants.KEL_ENCOUNTER_ID)
             const bossTime = bossFight.end_time-bossFight.start_time
             const chainDebuff = result.data.auras.map(debuff=>{
-                const playerDMG = damage.data.entries?.find(dmg=> debuff.id === dmg.id).total
+                const playerDMG = damage.data.entries?.find(dmg=> debuff.id === dmg.id)?.total
                 const avg = playerDMG/(bossTime-debuff.totalUptime)
                 const debuffDmg = Math.floor(avg*debuff.totalUptime)
                 return {...debuff, debuffDmg}
