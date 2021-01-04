@@ -82,6 +82,7 @@ class TacticalTable extends Component{
                     {
                         title: '诺斯滋补',
                         dataIndex: 'resto',
+                        render: (text, item)=> item.resto ? '有诅咒没吃滋补':'没问题'
                     },
                     {
                         title: '跳舞男迅捷鞋',
@@ -114,18 +115,18 @@ class TacticalTable extends Component{
                 title: '蜘蛛区',
                 children: [
                     {
-                        title: '自然抗',
-                        dataIndex: 'natureres',
-                        render: (text, item)=> item.natureres ? '有':'可能没有'
-                    },
-                    {
                         title: '蜘蛛1火箭鞋',
                         dataIndex: 'rocketBoot',
                     },
                     {
-                        title: '侍僧打断',
-                        dataIndex: 'interrupt1',
-                    }
+                        title: '侍僧暗吸',
+                        dataIndex: 'darkAbsorb',
+                        render: (text, item)=> item.darkAbsorb ? '有':'没有'
+                    },
+                    {
+                        title: '侍僧地精工兵',
+                        dataIndex: 'sapper',
+                    },
                 ]
             },
             {
@@ -135,6 +136,10 @@ class TacticalTable extends Component{
                         title: '冰龙暗抗吸收',
                         dataIndex: 'darkres2',
                         render: (text, item)=> !item.darkres2 && '没有'
+                    },
+                    {
+                        title: '冰龙死愿',
+                        dataIndex: 'deathwish4',
                     },
                     {
                         title: '老克冰抗',

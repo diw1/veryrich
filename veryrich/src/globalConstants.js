@@ -26,6 +26,7 @@ export const globalConstants = {
     DARK_RUNEID: 27869,
     DEMON_RUNEID: 16666,
     DENSE_BOMB: 23063, //致密炸弹
+    SAPPER: 13241, //地精工兵
     HAT: 11828, //电磁帽
     SLIME: 16024, //胖子区软泥
     DEATHWISH: 12328, //死愿ID
@@ -38,12 +39,14 @@ export const globalConstants = {
     INTERRUPT1: 15987, //侍僧ID
     THADDIUS_ENCOUNTER_ID: 1120, //电男encounterID
     LOATHEB_ENCOUNTER_ID: 1115, //孢子encounterID
+    NOTH_CURSE_ID: 29213, //诺斯诅咒ID
     NOTH_ENCOUNTER_ID: 1117, //诺斯encounterID
     RESTO: 11359, //滋补药水
     DARKRES: 17548, //强效暗抗药水
     ICERES: 17544, //强效暗抗药水
     NATUREDMG1: 30043, //小蜘蛛自然伤害1
     NATUREDMG2: 28428, //小蜘蛛自然伤害2
+    SHADOW_BRUST: 28447, //侍僧暗影爆发
     HEIGAN_ENCOUNTER_ID: 1112, //希尔盖
     SWIFT_BOOT_ITEM_ID: 7391, //迅捷鞋物品ID
     ROCKET_BOOT_ITEM_ID: 7189, //火箭鞋物品ID
@@ -51,6 +54,7 @@ export const globalConstants = {
     MAEXXNA_ENCOUNTER_ID: 1116, //蜘蛛3 ID
     LIFE_STEAL_ID: 28542, //冰龙生命吸取ID
     ANUB_ENCOUNTER_ID: 1107, //蜘蛛1 ID
+    SAPPHIRON_ENCOUNTER_ID: 1119, //冰龙ID
     KEL_ENCOUNTER_ID: 1114, //老克ID
     KEL_ID: 15990,
     MELEE_ID: 1,

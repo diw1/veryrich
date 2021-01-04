@@ -286,23 +286,25 @@ export default {
                     slimeTactics: result
                 })
             })
-
+            // 瘟疫1滋补
+            const nothCurse = await service.getDebuffsByAbility(reportId, globalConstants.NOTH_CURSE_ID)
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.RESTO, globalConstants.NOTH_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
-                    res.resto =  Number.isInteger(newCast) ? newCast : 0
+                    const hasDebuff = nothCurse.data.auras.find(i=>i.id===entry.id)
+                    const hasRes = record.data.entries.find(i=>i.id===entry.id)
+                    res.resto =  hasDebuff && !hasRes
                     return res
                 })
                 actions.report.save({
                     slimeTactics: result
                 })
             })
-
+            //跳舞男迅捷鞋
             service.getCastsByAbilityAndEncounter(reportId, 0, globalConstants.HEIGAN_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    const newCast = record.data.entries.find(i=>i.id===entry.id).gear.find(i=>i.id===globalConstants.SWIFT_BOOT_ITEM_ID)? 1 :0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.gear.find(i=>i.id===globalConstants.SWIFT_BOOT_ITEM_ID)? 1 :0
                     res.swiftBoot =  Number.isInteger(newCast) ? newCast : 0
                     return res
                 })
@@ -314,6 +316,7 @@ export default {
 
         async getThaddius(reportId){
             let result = actions.report.getS().report.tactics
+            //电男死愿
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.THADDIUS_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -326,6 +329,7 @@ export default {
                     thaddiusTactics: result
                 })
             })
+            //电男冲动
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.RUSH, globalConstants.THADDIUS_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -338,7 +342,7 @@ export default {
                     thaddiusTactics: result
                 })
             })
-
+            //孢子死愿
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.LOATHEB_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -351,6 +355,7 @@ export default {
                     thaddiusTactics: result
                 })
             })
+            //孢子冲动
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.RUSH, globalConstants.LOATHEB_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -367,6 +372,7 @@ export default {
 
         async get4DK(reportId){
             let result = actions.report.getS().report.tactics
+            //4DK 死愿
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -379,6 +385,7 @@ export default {
                     fourTactics: result
                 })
             })
+            //4DK 冲动
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.RUSH, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -391,7 +398,7 @@ export default {
                     fourTactics: result
                 })
             })
-
+            //4DK 鲁莽
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.RECKLESSNESS, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -404,6 +411,7 @@ export default {
                     fourTactics: result
                 })
             })
+            //4DK 剑舞
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.BLADEFLURRY, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -416,7 +424,7 @@ export default {
                     fourTactics: result
                 })
             })
-
+            //4DK 暗抗
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.DARKRES, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -458,39 +466,28 @@ export default {
                     spiderTactics: result
                 })
             })
-            // 侍僧打断
-            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.PUMMEL, interruptID).then(record=>{
+            // 侍僧地精工兵
+            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.SAPPER, interruptID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    res.interrupt1 = res.interrupt1 || 0
-                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
-                    res.interrupt1 =  Number.isInteger(newCast) ? res.interrupt1 + newCast : res.interrupt1
+                    res.sapper = res.sapper || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.sapper =  Number.isInteger(newCast) ? res.sapper + newCast : res.sapper
                     return res
                 })
                 actions.report.save({
                     spiderTactics: result
                 })
             })
-
-            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.SHIELDBASH, interruptID).then(record=>{
+            //一波流吸收
+            service.getDamageTakenByAbility(reportId, globalConstants.SHADOW_BRUST).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    res.interrupt1 = res.interrupt1 || 0
-                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
-                    res.interrupt1 =  Number.isInteger(newCast) ? res.interrupt1 + newCast : res.interrupt1
-                    return res
-                })
-                actions.report.save({
-                    spiderTactics: result
-                })
-            })
-
-            service.getDamageDoneByAbilityAndTarget(reportId, globalConstants.KICK, interruptID).then(record=>{
-                result = result.map(entry=>{
-                    let res = _.cloneDeep(entry)
-                    res.interrupt1 = res.interrupt1 || 0
-                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.hitCount
-                    res.interrupt1 =  Number.isInteger(newCast) ? res.interrupt1 + newCast : res.interrupt1
+                    res.darkAbsorb = true
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails.length>0 ?
+                        record.data.entries.find(i=>i.id===entry.id).hitdetails.find(hitdetail=> hitdetail.type==='Absorb'
+                            || hitdetail.type==='Tick Absorb' || hitdetail.type==='Resist' || hitdetail.type==='Tick' && hitdetail.absorbOrOverheal>0) : true
+                    res.darkAbsorb =  absorb
                     return res
                 })
                 actions.report.save({
@@ -502,7 +499,7 @@ export default {
             service.getCastsByAbilityAndEncounter(reportId, 0, globalConstants.ANUB_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
-                    const newCast = record.data.entries.find(i=>i.id===entry.id).gear.find(i=>i.id===globalConstants.ROCKET_BOOT_ITEM_ID)? 1 :0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.gear.find(i=>i.id===globalConstants.ROCKET_BOOT_ITEM_ID)? 1 :0
                     res.rocketBoot =  Number.isInteger(newCast) ? newCast : 0
                     return res
                 })
@@ -511,7 +508,6 @@ export default {
                 })
             })
             //冰龙的暗抗
-
             service.getDamageTakenByAbility(reportId, globalConstants.LIFE_STEAL_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
@@ -520,6 +516,19 @@ export default {
                         record.data.entries.find(i=>i.id===entry.id).hitdetails.find(hitdetail=> hitdetail.type==='Absorb'
                             || hitdetail.type==='Tick Absorb' || hitdetail.type==='Resist' || hitdetail.type==='Tick' && hitdetail.absorbOrOverheal>0) : true
                     res.darkres2 =  absorb
+                    return res
+                })
+                actions.report.save({
+                    spiderTactics: result
+                })
+            })
+            //冰龙死愿
+            service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.SAPPHIRON_ENCOUNTER_ID).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.deathwish4 = res.deathwish4 || 0
+                    const newCast = record.data.entries.find(i=>i.id===entry.id)?.total
+                    res.deathwish4 =  Number.isInteger(newCast) ? res.deathwish4 + newCast : res.deathwish4
                     return res
                 })
                 actions.report.save({
