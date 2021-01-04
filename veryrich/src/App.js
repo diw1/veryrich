@@ -34,7 +34,7 @@ class DashboardPage extends Component{
             const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
             promises = []
             promises.push(actions.report.getKelParry({reportId: report, kelID}))
-            promises.push(actions.report.getChainDebuff(report))
+            // promises.push(actions.report.getChainDebuff(report))
             promises.push(actions.report.getWebWrapDebuff(report))
             Promise.all(promises).then(()=>{
                 actions.report.getFightsData(report).then(()=>{this.setState({loading: false})})
@@ -115,7 +115,7 @@ class DashboardPage extends Component{
             const chainTime = Math.round(chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const chainDmg = chainDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.debuffDmg || ''
             const kelParryDmg = kelParry?.find(trashEntry=>trashEntry.id===entry.id)?.kelParryDmg
-            const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000 + globalConstants.WEB_WRAP_RUN) || ''
+            const webWrapTime = Math.round(webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime/1000) || ''
             const webDmg = webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.debuffDmg || ''
             const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
             const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0

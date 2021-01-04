@@ -603,10 +603,11 @@ export default {
             const bossFight = actions.report.getS().report.fight.fights.find(fight=>fight.boss===globalConstants.MAEXXNA_ENCOUNTER_ID)
             const bossTime = bossFight.end_time-bossFight.start_time
             const webWrapDebuff = result.data.auras.map(debuff=>{
+                const totalUptime = debuff.totalUptime + globalConstants.WEB_WRAP_RUN * debuff.bands.length * 1000
                 const playerDMG = damage.data.entries?.find(dmg=> debuff.id === dmg.id)?.total
-                const avg = playerDMG/(bossTime-debuff.totalUptime-globalConstants.WEB_WRAP_RUN*1000)
-                const debuffDmg = Math.floor(avg*(debuff.totalUptime+globalConstants.WEB_WRAP_RUN*1000))
-                return {...debuff, debuffDmg}
+                const avg = playerDMG/(bossTime-totalUptime)
+                const debuffDmg = Math.floor(avg* totalUptime)
+                return {...debuff, debuffDmg, totalUptime}
             })
             actions.report.save({
                 webWrapDebuff
