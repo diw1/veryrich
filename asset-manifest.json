@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/veryrich/static/css/main.bf29b1df.chunk.css",
-    "main.js": "/veryrich/static/js/main.90020779.chunk.js",
-    "main.js.map": "/veryrich/static/js/main.90020779.chunk.js.map",
+    "main.js": "/veryrich/static/js/main.aff85916.chunk.js",
+    "main.js.map": "/veryrich/static/js/main.aff85916.chunk.js.map",
     "runtime-main.js": "/veryrich/static/js/runtime-main.52ffc21d.js",
     "runtime-main.js.map": "/veryrich/static/js/runtime-main.52ffc21d.js.map",
     "static/css/2.21ee2aab.chunk.css": "/veryrich/static/css/2.21ee2aab.chunk.css",
     "static/js/2.32843244.chunk.js": "/veryrich/static/js/2.32843244.chunk.js",
     "static/js/2.32843244.chunk.js.map": "/veryrich/static/js/2.32843244.chunk.js.map",
     "index.html": "/veryrich/index.html",
-    "precache-manifest.6da1eb5315f4a5af3a3ac9d9356b855d.js": "/veryrich/precache-manifest.6da1eb5315f4a5af3a3ac9d9356b855d.js",
+    "precache-manifest.8ab8bd2904250db79f213509a486525c.js": "/veryrich/precache-manifest.8ab8bd2904250db79f213509a486525c.js",
     "service-worker.js": "/veryrich/service-worker.js",
     "static/css/2.21ee2aab.chunk.css.map": "/veryrich/static/css/2.21ee2aab.chunk.css.map",
     "static/css/main.bf29b1df.chunk.css.map": "/veryrich/static/css/main.bf29b1df.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.21ee2aab.chunk.css",
     "static/js/2.32843244.chunk.js",
     "static/css/main.bf29b1df.chunk.css",
-    "static/js/main.90020779.chunk.js"
+    "static/js/main.aff85916.chunk.js"
   ]
 }
