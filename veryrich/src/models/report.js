@@ -168,7 +168,7 @@ export default {
 
         async getFightsData(reportId){
             let report = actions.report.getS().report
-            let {fight, kelParry, chainDebuff, webWrapDebuff} = report
+            let {fight, kelParry, webWrapDebuff} = report
             const {fights} = fight
             const fightsPromises = fights.map(async fight=> {
                 const fightsSummary = await service.getFightSummary(reportId, fight.start_time, fight.end_time)
@@ -193,8 +193,8 @@ export default {
                         fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
                     }
                     if (fightDetail.BossID === globalConstants.KEL_ENCOUNTER_ID){
-                        const debuffDmg = chainDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
-                        fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
+                        // const debuffDmg = chainDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
+                        // fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
                         const parryDmg = kelParry.find(parry=>parry.id===player.id)?.kelParryDmg
                         fightDetail.damageDone = parryDmg ? fightDetail.damageDone + parryDmg : fightDetail.damageDone
                     }
