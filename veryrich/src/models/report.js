@@ -188,16 +188,16 @@ export default {
                         damageDone: fightsSummary.data?.damageDone?.find(record=>record.id===player.id)?.total || 0,
                         healing: fightsSummary.data?.healingDone?.find(record=>record.id===player.id)?.total || 0,
                     }
-                    if (fightDetail.BossID === globalConstants.MAEXXNA_ENCOUNTER_ID){
-                        const debuffDmg = webWrapDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
-                        fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
-                    }
-                    if (fightDetail.BossID === globalConstants.KEL_ENCOUNTER_ID){
-                        // const debuffDmg = chainDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
-                        // fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
-                        const parryDmg = kelParry.find(parry=>parry.id===player.id)?.kelParryDmg
-                        fightDetail.damageDone = parryDmg ? fightDetail.damageDone + parryDmg : fightDetail.damageDone
-                    }
+                    // if (fightDetail.BossID === globalConstants.MAEXXNA_ENCOUNTER_ID){
+                    //     const debuffDmg = webWrapDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
+                    //     fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
+                    // }
+                    // if (fightDetail.BossID === globalConstants.KEL_ENCOUNTER_ID){
+                    //     // const debuffDmg = chainDebuff.find(debuff=>debuff.id===player.id)?.debuffDmg
+                    //     // fightDetail.damageDone = debuffDmg ? fightDetail.damageDone + debuffDmg : fightDetail.damageDone
+                    //     const parryDmg = kelParry.find(parry=>parry.id===player.id)?.kelParryDmg
+                    //     fightDetail.damageDone = parryDmg ? fightDetail.damageDone + parryDmg : fightDetail.damageDone
+                    // }
                     return (fightDetail)
                 })
             })
