@@ -31,14 +31,12 @@ class DashboardPage extends Component{
         promises.push(actions.report.getBOSSDmg(report))
         promises.push(actions.report.getFight(report))
         Promise.all(promises).then(()=>{
-            const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
-            promises = []
-            promises.push(actions.report.getKelParry({reportId: report, kelID}))
+            actions.report.getFightsData(report).then(()=>{this.setState({loading: false})})
+            // const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
+            // promises = []
+            // promises.push(actions.report.getKelParry({reportId: report, kelID}))
             // promises.push(actions.report.getChainDebuff(report))
-            promises.push(actions.report.getWebWrapDebuff(report))
-            Promise.all(promises).then(()=>{
-                actions.report.getFightsData(report).then(()=>{this.setState({loading: false})})
-            })
+            // promises.push(actions.report.getWebWrapDebuff(report))
         })
     }
 
