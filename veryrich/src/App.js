@@ -225,7 +225,7 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.bossDmg-b.bossDmg,
             },
             {
-                title: <Tooltip title="去除DK2, DK3，孢子男，电男的伤害">
+                title: <Tooltip title="去除DK2, DK3，孢子男，电男，老克的伤害">
                     <span>有效boss伤害<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'filteredBossDmgData',
@@ -256,44 +256,44 @@ class DashboardPage extends Component{
                 dataIndex: 'hunterAuraPenalty',
                 render: text=> text !== 0 ? text : null,
             },
-            {
-                title: '老克',
-                children: [
-                    {
-                        title: '心控时间',
-                        dataIndex: 'chainTime',
-                    },
-                    {
-                        title: '心控补偿',
-                        dataIndex: 'chainDmg',
-                    },
-                    {
-                        title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
-                            <span>招架补偿<QuestionCircleOutlined /></span>
-                        </Tooltip>,
-                        dataIndex: 'kelParryDmg',
-                        render: text=> text !== 0 ? text : null,
-                    },
-                ]
-            },
-            {
-                title:<Tooltip title="蜘蛛3上墙">
-                    <span>蛛网裹体<QuestionCircleOutlined /></span>
-                </Tooltip>,
-                children: [
-                    {
-                        title:<Tooltip title={`时间计算方式为上墙debuff时间+${globalConstants.WEB_WRAP_RUN}秒跑路时间`}>
-                            <span>时间<QuestionCircleOutlined /></span>
-                        </Tooltip>,
-                        dataIndex: 'webWrapTime',
-                    },
-                    {
-                        title: '上墙补偿',
-                        dataIndex: 'webDmg',
-                    },
-
-                ]
-            },
+            // {
+            //     title: '老克',
+            //     children: [
+            //         {
+            //             title: '心控时间',
+            //             dataIndex: 'chainTime',
+            //         },
+            //         {
+            //             title: '心控补偿',
+            //             dataIndex: 'chainDmg',
+            //         },
+            //         {
+            //             title: <Tooltip title="对于所有的招架，战士的肉搏伤害按照个人平均值两倍进行补偿；战士技能伤害，贼肉搏伤害按照个人平均值进行补偿">
+            //                 <span>招架补偿<QuestionCircleOutlined /></span>
+            //             </Tooltip>,
+            //             dataIndex: 'kelParryDmg',
+            //             render: text=> text !== 0 ? text : null,
+            //         },
+            //     ]
+            // },
+            // {
+            //     title:<Tooltip title="蜘蛛3上墙">
+            //         <span>蛛网裹体<QuestionCircleOutlined /></span>
+            //     </Tooltip>,
+            //     children: [
+            //         {
+            //             title:<Tooltip title={`时间计算方式为上墙debuff时间+${globalConstants.WEB_WRAP_RUN}秒跑路时间`}>
+            //                 <span>时间<QuestionCircleOutlined /></span>
+            //             </Tooltip>,
+            //             dataIndex: 'webWrapTime',
+            //         },
+            //         {
+            //             title: '上墙补偿',
+            //             dataIndex: 'webDmg',
+            //         },
+            //
+            //     ]
+            // },
             {
                 title:<Tooltip title="传送时间无法自动获取">
                     <span>跳舞男传送<QuestionCircleOutlined /></span>
