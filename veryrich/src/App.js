@@ -59,8 +59,6 @@ class DashboardPage extends Component{
                 const trashIds = this.findTargetIds(globalConstants.TRASHIDS, this.props.fight)
                 const filteredBossIds = this.findTargetIds(globalConstants.BOSSIDS.filter(v => !globalConstants.REMOVEBOSSIDS.includes(v)), this.props.fight)
                 const removedBossIds = this.findTargetIds(globalConstants.REMOVEBOSSIDS, this.props.fight)
-                const kelID = this.findTargetIds([globalConstants.KEL_ID], this.props.fight)
-                promises.push(actions.report.getKelParry({reportId: report, kelID}))
                 promises.push(actions.report.getBossTrashDmg({trashIds, reportId: report, removedBossIds}))
                 promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: report}))
                 promises.push(actions.report.getManaPotion(report))
