@@ -168,7 +168,7 @@ export default {
 
         async getFightsData(reportId){
             let report = actions.report.getS().report
-            let {fight, kelParry, webWrapDebuff} = report
+            let {fight} = report
             const {fights} = fight
             const fightsPromises = fights.map(async fight=> {
                 const fightsSummary = await service.getFightSummary(reportId, fight.start_time, fight.end_time)
@@ -372,6 +372,19 @@ export default {
 
         async get4DK(reportId){
             let result = actions.report.getS().report.tactics
+            const fight =  actions.report.getS().report.fight
+            const start = fight.fights.find(record=>record.boss===1113).end_time
+            const end = fight.fights.find(record=>record.boss===1109).start_time
+            service.getBuffsByAbilityAndTime(reportId, globalConstants.STONESHIELD, start, end).then(record=>{
+                result = result.map(entry=>{
+                    let res = _.cloneDeep(entry)
+                    res.stoneShield =  record.data.auras?.find(i=>i.id===entry.id)
+                    return res
+                })
+                actions.report.save({
+                    fourTactics: result
+                })
+            })
             //4DK 死愿
             service.getCastsByAbilityAndEncounter(reportId, globalConstants.DEATHWISH, globalConstants.FOUR_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
@@ -445,7 +458,9 @@ export default {
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
                     res.natureres = res.natureres || false
-                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails?.find(hitdetail=>hitdetail.type==='Absorb')
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails.length>0 ?
+                        record.data.entries.find(i=>i.id===entry.id).hitdetails.find(hitdetail=> hitdetail.type==='Absorb'
+                            || hitdetail.type==='Tick Absorb' || hitdetail.type==='Resist' || hitdetail.type==='Hit' && hitdetail.absorbOrOverheal>0) : true
                     res.natureres =  absorb || res.natureres
                     return res
                 })
@@ -458,7 +473,9 @@ export default {
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
                     res.natureres = res.natureres || false
-                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails?.find(hitdetail=>hitdetail.type==='Absorb')
+                    const absorb = record.data.entries.find(i=>i.id===entry.id)?.hitdetails.length>0 ?
+                        record.data.entries.find(i=>i.id===entry.id).hitdetails.find(hitdetail=> hitdetail.type==='Absorb'
+                            || hitdetail.type==='Tick Absorb' || hitdetail.type==='Resist' || hitdetail.type==='Hit' && hitdetail.absorbOrOverheal>0) : true
                     res.natureres =  absorb || res.natureres
                     return res
                 })

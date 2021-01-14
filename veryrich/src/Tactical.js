@@ -95,18 +95,23 @@ class TacticalTable extends Component{
                 ]
             },
             {
-                title: '4DK',
+                title: '军事区',
                 children: [
                     {
-                        title: '暗抗',
+                        title: '邪恶武器石盾',
+                        dataIndex: 'stoneShield',
+                        render: (text, item)=> item.stoneShield ? '1':'0'
+                    },
+                    {
+                        title: '4DK暗抗',
                         dataIndex: 'darkres',
                     },
                     {
-                        title: '鲁莽/乱舞',
+                        title: '4DK鲁莽/乱舞',
                         dataIndex: 'recklessness',
                     },
                     {
-                        title: '死愿/冲动',
+                        title: '4DK死愿/冲动',
                         dataIndex: 'deathwish3',
                     },
                 ]
@@ -114,6 +119,11 @@ class TacticalTable extends Component{
             {
                 title: '蜘蛛区',
                 children: [
+                    {
+                        title: '自然抗',
+                        dataIndex: 'natureres',
+                        render: (text, item)=> item.natureres ? '有自然抗或没受伤害': '可能没有(需复查)'
+                    },
                     {
                         title: '蜘蛛1火箭鞋',
                         dataIndex: 'rocketBoot',

@@ -115,7 +115,7 @@ class DashboardPage extends Component{
             const webDmg = webWrapDebuff?.find(trashEntry=>trashEntry.id===entry.id)?.debuffDmg || ''
             const hunterAuraStatus = hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUses>12 || hunterAura?.find(trashEntry=>trashEntry.id===entry.id)?.totalUptime>500000
             const hunterAuraPenalty = hunterAuraStatus && (entry.type==='Warrior'||entry.type==='Rogue') ? Math.floor(-0.015 * trashDmg) : 0
-            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + Number(chainDmg) + Number(webDmg) + Number(kelParryDmg) + this.calculateManualSum(manual)
+            const finalDamage = Number(trashDmg) + Number(sunderPenalty) + Number(hunterAuraPenalty) + this.calculateManualSum(manual)
             finalDmgMax[entry.type] = finalDmgMax[entry.type] > finalDamage ? finalDmgMax[entry.type] : finalDamage
             return {
                 id: entry.id,
@@ -292,19 +292,19 @@ class DashboardPage extends Component{
             //
             //     ]
             // },
-            {
-                title:<Tooltip title="传送时间无法自动获取">
-                    <span>跳舞男传送<QuestionCircleOutlined /></span>
-                </Tooltip>,
-                children: [
-                    {
-                        title: '补分',
-                        dataIndex: ['manual','tel'],
-                        render: (text, record) => <Input value={this.state.manual.tel} onBlur={(e)=>this.handleManualChange(e, record, 'tel')} style={{maxWidth: 85}}/>
-                    },
-
-                ]
-            },
+            // {
+            //     title:<Tooltip title="传送时间无法自动获取">
+            //         <span>跳舞男传送<QuestionCircleOutlined /></span>
+            //     </Tooltip>,
+            //     children: [
+            //         {
+            //             title: '补分',
+            //             dataIndex: ['manual','tel'],
+            //             render: (text, record) => <Input value={this.state.manual.tel} onBlur={(e)=>this.handleManualChange(e, record, 'tel')} style={{maxWidth: 85}}/>
+            //         },
+            //
+            //     ]
+            // },
             {
                 title: '大蓝',
                 dataIndex: 'manaPotionCasts',

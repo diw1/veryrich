@@ -42,6 +42,7 @@ export const globalConstants = {
     NOTH_CURSE_ID: 29213, //诺斯诅咒ID
     NOTH_ENCOUNTER_ID: 1117, //诺斯encounterID
     RESTO: 11359, //滋补药水
+    STONESHIELD: 17540, //石盾法术ID
     DARKRES: 17548, //强效暗抗药水
     ICERES: 17544, //强效暗抗药水
     NATUREDMG1: 30043, //小蜘蛛自然伤害1
