@@ -57,6 +57,11 @@ function getBuffsByAbilityAndTime (reportID, abilityId, start, end) {
     return getData(url)
 }
 
+function getBuffsByAbilityAndEncounter (reportID, abilityId, encounterID) {
+    const url = `${globalConstants.BASE_URL}report/tables/buffs/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}&encounter=${encounterID}`
+    return getData(url)
+}
+
 function getCastsByAbility (reportID, abilityId) {
     const url = `${globalConstants.BASE_URL}report/tables/casts/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&abilityid=${abilityId}`
     return getData(url)
@@ -85,6 +90,7 @@ export default {
     getCastsByAbility,
     getBuffsByAbility,
     getBuffsByAbilityAndTime,
+    getBuffsByAbilityAndEncounter,
     getCastsByAbilityAndEncounter,
     getDamageDoneByAbilityAndEncounter
 }

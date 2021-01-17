@@ -288,11 +288,11 @@ export default {
             })
             // 瘟疫1滋补
             const nothCurse = await service.getDebuffsByAbility(reportId, globalConstants.NOTH_CURSE_ID)
-            service.getCastsByAbilityAndEncounter(reportId, globalConstants.RESTO, globalConstants.NOTH_ENCOUNTER_ID).then(record=>{
+            service.getBuffsByAbilityAndEncounter(reportId, globalConstants.RESTO, globalConstants.NOTH_ENCOUNTER_ID).then(record=>{
                 result = result.map(entry=>{
                     let res = _.cloneDeep(entry)
                     const hasDebuff = nothCurse.data.auras.find(i=>i.id===entry.id)
-                    const hasRes = record.data.entries.find(i=>i.id===entry.id)
+                    const hasRes = record.data.auras.find(i=>i.id===entry.id)?.totalUptime > 5000
                     res.resto =  hasDebuff && !hasRes
                     return res
                 })

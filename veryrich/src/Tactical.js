@@ -82,7 +82,7 @@ class TacticalTable extends Component{
                     {
                         title: '诺斯滋补',
                         dataIndex: 'resto',
-                        render: (text, item)=> item.resto ? '有诅咒没吃滋补':'没问题'
+                        render: (text, item)=> item.resto ? '有诅咒没滋补或吃了被取消':'没问题'
                     },
                     {
                         title: '跳舞男迅捷鞋',
