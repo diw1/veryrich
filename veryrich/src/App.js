@@ -70,6 +70,9 @@ class DashboardPage extends Component{
                 promises.push(actions.report.getBossTrashSunderCasts({
                     trashIds: trashIds.concat(filteredBossIds),
                     reportId: this.state.report}))
+                promises.push(actions.report.getBossTrashLess5SunderCasts({
+                    trashIds: trashIds.concat(filteredBossIds),
+                    reportId: this.state.report}))
             }
             Promise.all(promises).then(()=>{
                 this.setState({loading: false})
@@ -95,7 +98,7 @@ class DashboardPage extends Component{
     }
 
     generateSource = () => {
-        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, webWrapDebuff, rogueSunderDebuff, kelParry} = this.props
+        const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, bossTrashLess5SunderCasts, webWrapDebuff, rogueSunderDebuff, kelParry} = this.props
         let finalDmgMax = {}
         const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         let source = bossDmg?.map(entry=>{
@@ -103,6 +106,7 @@ class DashboardPage extends Component{
             const filteredBossDmgData = filteredBossDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
             const sunderCasts = entry.type === 'Warrior' ? bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder :
                 bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.rogueSunder ? rogueSunderDebuff : 0
+            const less5sunderCasts = entry.type === 'Warrior' ? bossTrashLess5SunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.less5sunder : ''
             const sunderPenalty = entry.type==='Warrior' ? sunderCasts < sunderBase  ? Math.floor(-0.05 * trashDmg) : 0 :
                 entry.type==='Rogue' ? sunderCasts * 2200 : 0
             const manual = this.state.manual.find(trashEntry=>trashEntry.id===entry.id) || {}
@@ -135,7 +139,8 @@ class DashboardPage extends Component{
                 webWrapTime,
                 webDmg,
                 manual,
-                kelParryDmg
+                kelParryDmg,
+                less5sunderCasts
             }
         })
 
@@ -234,11 +239,11 @@ class DashboardPage extends Component{
                 sorter: (a, b) => a.bossTrashDmg-b.bossTrashDmg,
             },
             {
-                title: <Tooltip title="贼的破甲为强破">
-                    <span>有效破甲<QuestionCircleOutlined /></span>
+                title: <Tooltip title="目标是考核DPS的怪，括号里是对有效目标破甲层数不足5层时打的破甲，贼的破甲为强破">
+                    <span>有效目标破甲数<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'sunderCasts',
-                render: (text,record)=> record.type ==='Warrior' || record.type ==='Rogue' ? text : '',
+                render: (text,record)=> record.type ==='Warrior' ? `${text}(${record.less5sunderCasts})` : record.type ==='Rogue' ? text : '',
             },
             {
                 title: <Tooltip title={`平均数的70%为: ${sunderBase}，不足的扣5%有效伤害, 贼每个成功的强破补偿2200伤害`}>

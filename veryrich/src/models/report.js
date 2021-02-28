@@ -28,6 +28,7 @@ export default {
         fourTactics: null,
         spiderTactics: null,
         kelParry: null,
+        bossTrashLess5SunderCasts:null
     },
     reducers: {
         save(state, data) {
@@ -144,6 +145,30 @@ export default {
                     })
                     actions.report.save({
                         bossTrashSunderCasts: result
+                    })
+
+                })
+            })
+        },
+
+        async getBossTrashLess5SunderCasts({reportId, trashIds}){
+            let result = actions.report.getS().report.bossDmg
+            let promises = []
+            trashIds.map(trashId=> {
+                promises.push(service.getBOSSTrashSundarCast(reportId, trashId))
+            })
+            Promise.all(promises).then(trashRecords=>{
+                trashRecords.map(trashRecord=>{
+                    result = result.map(entry=>{
+                        let res = _.cloneDeep(entry)
+                        res.less5sunder = res.less5sunder || 0
+                        const newCast = trashRecord.data.entries.find(i=>i.id===entry.id)?.abilities.find(ability=>ability.name===
+                            '破甲攻击')?.total
+                        res.less5sunder =  Number.isInteger(newCast) ? res.less5sunder + newCast : res.less5sunder
+                        return res
+                    })
+                    actions.report.save({
+                        bossTrashLess5SunderCasts: result
                     })
 
                 })

@@ -22,6 +22,11 @@ function getBOSSTrashCast (reportID, trashIDs) {
     return getData(url)
 }
 
+function getBOSSTrashSundarCast (reportID, trashIDs) {
+    const url = `${globalConstants.BASE_URL}report/tables/casts/${reportID}?api_key=${globalConstants.API_KEY}&end=${globalConstants.ENDTIME}&targetid=${trashIDs}&filter=ability.id%3D11597%20AND%20NOT%20IN%20RANGE%20FROM%20type%20%3D%20%22applydebuffstack%22%20AND%20ability.id%20%3D%2011597%20AND%20stack%20%3D%205%20TO%20type%3D%22removedebuff%22%20AND%20ability.id%3D11597%20GROUP%20BY%20target%20ON%20target%20END&by=source`
+    return getData(url)
+}
+
 function getFight (reportID) {
     const url = `${globalConstants.BASE_URL}report/fights/${reportID}?api_key=${globalConstants.API_KEY}`
     return getData(url)
@@ -92,5 +97,6 @@ export default {
     getBuffsByAbilityAndTime,
     getBuffsByAbilityAndEncounter,
     getCastsByAbilityAndEncounter,
-    getDamageDoneByAbilityAndEncounter
+    getDamageDoneByAbilityAndEncounter,
+    getBOSSTrashSundarCast
 }
