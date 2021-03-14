@@ -63,7 +63,7 @@ class DashboardPage extends Component{
                 promises.push(actions.report.getExcludedBossDmg({removedBossIds, reportId: report}))
                 promises.push(actions.report.getManaPotion(report))
                 promises.push(actions.report.getRogueSunderDebuff(report))
-                promises.push(actions.report.getChainDebuff(report))
+                // promises.push(actions.report.getChainDebuff(report))
                 promises.push(actions.report.getWebWrapDebuff(report))
                 promises.push(actions.report.getRunes(report))
                 promises.push(actions.report.getHunterbuff(report))
@@ -92,6 +92,12 @@ class DashboardPage extends Component{
         return Math.floor(sumWithoutTop4/(furyWarriorCounts-4)*0.7)
     }
 
+    calculatedEffectiveSunderAvg = (sunderCasts) => {
+        let sumWithoutTop4 = sunderCasts?.map(i=>i.less5sunder).sort((a,b)=>b-a).slice(4).reduce((sum, item)=>sum+item)
+        let furyWarriorCounts = sunderCasts?.filter(item=> item.type ==='Warrior')?.length
+        return Math.floor(sumWithoutTop4/(furyWarriorCounts-4)*0.7)
+    }
+
     calculateManualSum = (manual) => {
         const newManual = {...manual, id:0}
         return Object.values(newManual)?.reduce((a, b) => a + b, 0)
@@ -100,6 +106,7 @@ class DashboardPage extends Component{
     generateSource = () => {
         const {bossDmg, bossTrashDmg, bossTrashSunderCasts, manaPotion, runes, filteredBossDmg, hunterAura, chainDebuff, bossTrashLess5SunderCasts, webWrapDebuff, rogueSunderDebuff, kelParry} = this.props
         let finalDmgMax = {}
+        const less5SunderBase = this.calculatedEffectiveSunderAvg(bossTrashLess5SunderCasts)
         const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
         let source = bossDmg?.map(entry=>{
             const trashDmg = bossTrashDmg?.find(trashEntry=>trashEntry.id===entry.id)?.total
@@ -107,7 +114,7 @@ class DashboardPage extends Component{
             const sunderCasts = entry.type === 'Warrior' ? bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.sunder :
                 bossTrashSunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.rogueSunder ? rogueSunderDebuff : 0
             const less5sunderCasts = entry.type === 'Warrior' ? bossTrashLess5SunderCasts?.find(trashEntry=>trashEntry.id===entry.id)?.less5sunder : ''
-            const sunderPenalty = entry.type==='Warrior' ? sunderCasts < sunderBase  ? Math.floor(-0.05 * trashDmg) : 0 :
+            const sunderPenalty = entry.type==='Warrior' ? less5sunderCasts < less5SunderBase || sunderCasts< sunderBase  ? Math.floor(-0.05 * trashDmg) : 0 :
                 entry.type==='Rogue' ? sunderCasts * 2200 : 0
             const manual = this.state.manual.find(trashEntry=>trashEntry.id===entry.id) || {}
             const manaPotionCasts = manaPotion?.find(trashEntry=>trashEntry.id===entry.id)?.total || 0
@@ -167,10 +174,11 @@ class DashboardPage extends Component{
     }
 
     render() {
-        const {fightsData, bossTrashSunderCasts} = this.props
+        const {fightsData, bossTrashSunderCasts, bossTrashLess5SunderCasts} = this.props
         const tactics = this.mergeTactics()
         const {tactical, loading} = this.state
         const sunderBase = this.calculatedSunderAvg(bossTrashSunderCasts)
+        const less5SunderBase = this.calculatedEffectiveSunderAvg(bossTrashLess5SunderCasts)
         const dataSource =  this.generateSource()
         const excelDataSource = fightsData
         const columns = [
@@ -246,7 +254,7 @@ class DashboardPage extends Component{
                 render: (text,record)=> record.type ==='Warrior' ? `${text}(${record.less5sunderCasts})` : record.type ==='Rogue' ? text : '',
             },
             {
-                title: <Tooltip title={`平均数的70%为: ${sunderBase}，不足的扣5%有效伤害, 贼每个成功的强破补偿2200伤害`}>
+                title: <Tooltip title={`平均数的70%为: ${sunderBase}(${less5SunderBase})，任意一项不足的扣5%有效伤害, 贼每个成功的强破补偿2200伤害`}>
                     <span>破甲补/扣分<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'sunderPenalty',
