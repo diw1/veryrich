@@ -251,7 +251,9 @@ class DashboardPage extends Component{
                     <span>有效目标破甲数<QuestionCircleOutlined /></span>
                 </Tooltip>,
                 dataIndex: 'sunderCasts',
-                render: (text,record)=> record.type ==='Warrior' ? `${text}(${record.less5sunderCasts})` : record.type ==='Rogue' ? text : '',
+                render: (text,record)=> record.type ==='Warrior' ? `
+                ${text}(${record.less5sunderCasts} - ${(parseFloat(record.less5sunderCasts)/parseFloat(record.sunderCasts)*100).toFixed(2)}%)`
+                    : record.type ==='Rogue' ? text : '',
             },
             {
                 title: <Tooltip title={`平均数的70%为: ${sunderBase}(${less5SunderBase})，任意一项不足的扣5%有效伤害, 贼每个成功的强破补偿2200伤害`}>
